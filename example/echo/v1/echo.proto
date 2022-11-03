@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package echo.v1;
+
+import "google/type/datetime.proto";
+
+option go_package = "github.com/clly/protoc-telemetry-go/example/gen/go/echo/v1;echov1";
+
+message EchoRequest {
+    string msg = 1;
+}
+
+message EchoResponse {
+    string msg = 1;
+    google.type.DateTime now = 2;
+}
+
+service EchoService {
+    rpc Echo(EchoRequest) returns (EchoResponse) {}
+}
