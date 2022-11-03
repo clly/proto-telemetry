@@ -4,5 +4,11 @@ managed:
 plugins:
   - name: go
     out: gen/proto/go
+    opt: paths=source_relative
   - name: go-grpc
+    out: gen/proto/go
+    opt:
+      - paths=source_relative
+      - require_unimplemented_servers=false
+  - name: telemetry
     out: gen/proto/go
