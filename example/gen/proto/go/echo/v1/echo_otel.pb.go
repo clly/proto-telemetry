@@ -11,13 +11,13 @@ import (
 func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
-		attribute.String(`EchoRequest_Msg`, string(x.Msg)),
+		attribute.String("echorequest.msg", x.Msg),
 	)
 }
 
 func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
-		attribute.String(`EchoResponse_Msg`, string(x.Msg)),
+		attribute.String("echoresponse.msg", x.Msg),
 	)
 }

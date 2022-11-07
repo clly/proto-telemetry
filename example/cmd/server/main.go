@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
+	"time"
 
-	echov1 "github.com/clly/protoc-telemetry-go/example/gen/proto/go/v1"
+	"go.opentelemetry.io/otel"
+	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/grpc"
+
+	echov1 "github.com/clly/protoc-telemetry-go/example/gen/proto/go/echo/v1"
+	"github.com/clly/protoc-telemetry-go/example/tracing"
 )
 
 func main() {
@@ -22,6 +28,12 @@ func run() error {
 		return fmt.Errorf("failed to listen on %s: %w", listen, err)
 	}
 
+	shutdown, err := tracing.Init()
+	if err != nil {
+		return err
+	}
+	defer shutdown()
+
 	server := grpc.NewServer()
 	echov1.RegisterEchoServiceServer(server, &svr{})
 	log.Println("listening on", listener.Addr())
@@ -36,6 +48,24 @@ type svr struct {
 	echov1.UnimplementedEchoServiceServer
 }
 
-// func (s *svr) Echo(ctx context.Context, req *echov1.EchoRequest) (*echov1.EchoResponse, error) {
-// 	return nil, nil
-// }
+func (s *svr) Echo(ctx context.Context, req *echov1.EchoRequest) (*echov1.EchoResponse, error) {
+	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, "Echo")
+	defer span.End()
+	req.TraceAttributes(ctx)
+	return &echov1.EchoResponse{
+		Msg: req.Msg,
+		Now: dtFromTime(time.Now()),
+	}, nil
+}
+
+func dtFromTime(t time.Time) *datetime.DateTime {
+	return &datetime.DateTime{
+		Year:    int32(t.Year()),
+		Month:   int32(t.Month()),
+		Day:     int32(t.Day()),
+		Hours:   int32(t.Hour()),
+		Minutes: int32(t.Minute()),
+		Seconds: int32(t.Second()),
+		Nanos:   int32(t.Nanosecond()),
+	}
+}

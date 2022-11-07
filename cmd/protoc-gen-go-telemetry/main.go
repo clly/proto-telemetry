@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -51,19 +51,8 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
 		for _, field := range msg.Fields {
-			attributeType, cast := attributeFromKind(field.Desc.Kind())
-			if attributeType == "" {
-				continue
-			}
-			b := bytes.NewBuffer(make([]byte, 0, 1024))
-			b.WriteString(fmt.Sprint("attribute.", attributeType, "(`", field.GoIdent.GoName, "`, "))
-			if cast == "" {
-
-				b.WriteString(fmt.Sprint("x.", field.GoName, "),"))
-			} else {
-				b.WriteString(fmt.Sprint(cast, "(x.", field.GoName, ")),"))
-			}
-			g.P(b.String())
+			f := newField(field)
+			f.Generate(g)
 		}
 		g.P(")")
 		g.P("}")
@@ -71,7 +60,35 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 	}
 }
 
+type FieldAttribute struct {
+	kind     protoreflect.Kind
+	goName   string
+	attrName string
+	attrKind string
+}
+
+func newField(field *protogen.Field) FieldAttribute {
+	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
+	attrName = strings.ToLower(attrName)
+	attrKind, _ := attributeFromKind(field.Desc.Kind())
+	return FieldAttribute{
+		kind:     field.Desc.Kind(),
+		attrName: attrName,
+		attrKind: attrKind,
+		goName:   field.GoName,
+	}
+}
+
+func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
+	if f.attrKind == "" {
+		return
+	}
+	s := fmt.Sprintf(`attribute.%s("%s", x.%s),`, f.attrKind, f.attrName, f.goName)
+	g.P(s)
+}
+
 func attributeFromKind(k protoreflect.Kind) (string, string) {
+
 	switch k {
 	case protoreflect.BoolKind:
 		return "Bool", ""
@@ -82,7 +99,7 @@ func attributeFromKind(k protoreflect.Kind) (string, string) {
 		protoreflect.Uint32Kind, protoreflect.Uint64Kind:
 		return "Int64", "int64"
 	case protoreflect.StringKind:
-		return "String", "string"
+		return "String", ""
 	default:
 		return "", ""
 	}

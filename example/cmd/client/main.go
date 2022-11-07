@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	echov1 "github.com/clly/protoc-telemetry-go/example/gen/proto/go/v1"
+	echov1 "github.com/clly/protoc-telemetry-go/example/gen/proto/go/echo/v1"
+	"github.com/clly/protoc-telemetry-go/example/tracing"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 )
 
@@ -23,8 +25,22 @@ func run() error {
 	}
 	log.Println("connected to", connectTo)
 
+	shutdown, err := tracing.Init()
+	if err != nil {
+		return err
+	}
+	defer shutdown()
+
 	echo := echov1.NewEchoServiceClient(conn)
 
+	ctx := context.Background()
+	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/client").Start(ctx, "Echo Client")
+	defer span.End()
+
+	req := &echov1.EchoRequest{
+		Msg: "Hello World!",
+	}
+	req.TraceAttributes(ctx)
 	if _, err := echo.Echo(context.Background(), &echov1.EchoRequest{
 		Msg: "Hello World!",
 	}); err != nil {
