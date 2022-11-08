@@ -7,14 +7,25 @@ import "google/type/datetime.proto";
 option go_package = "github.com/clly/protoc-telemetry-go/example/gen/go/echo/v1;echov1";
 
 message EchoRequest {
-    string msg = 1;
+  string msg = 1;
+  int32 num32 = 2;
+  uint32 unum32 = 3;
+  int64 num64 = 4;
+  MessageDetails details = 5;
+  message Envelope {
+    string name = 1;
+  }
+}
+
+message MessageDetails {
+  string details = 1;
 }
 
 message EchoResponse {
-    string msg = 1;
-    google.type.DateTime now = 2;
+  string msg = 1;
+  google.type.DateTime now = 2;
 }
 
 service EchoService {
-    rpc Echo(EchoRequest) returns (EchoResponse) {}
+  rpc Echo(EchoRequest) returns (EchoResponse) {}
 }

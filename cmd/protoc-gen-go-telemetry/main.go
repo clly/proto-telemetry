@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
@@ -61,29 +62,41 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 }
 
 type FieldAttribute struct {
-	kind     protoreflect.Kind
+	field    *protogen.Field
 	goName   string
 	attrName string
 	attrKind string
+	castCall string
 }
 
 func newField(field *protogen.Field) FieldAttribute {
 	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
 	attrName = strings.ToLower(attrName)
-	attrKind, _ := attributeFromKind(field.Desc.Kind())
+	attrKind, castCall := attributeFromKind(field.Desc.Kind())
+
 	return FieldAttribute{
-		kind:     field.Desc.Kind(),
 		attrName: attrName,
 		attrKind: attrKind,
+		castCall: castCall,
 		goName:   field.GoName,
+		field:    field,
 	}
 }
 
 func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
 	if f.attrKind == "" {
+		fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
 		return
 	}
-	s := fmt.Sprintf(`attribute.%s("%s", x.%s),`, f.attrKind, f.attrName, f.goName)
+
+	var s string
+	if f.castCall == "" {
+		s = fmt.Sprintf(`attribute.%s("%s", x.%s),`, f.attrKind, f.attrName, f.goName)
+	} else {
+
+		s = fmt.Sprintf(`attribute.%s("%s", %s(x.%s)),`, f.attrKind, f.attrName, f.castCall, f.goName)
+	}
+
 	g.P(s)
 }
 
