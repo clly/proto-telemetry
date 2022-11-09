@@ -47,7 +47,13 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 	_ = attributeIdent
 	_ = traceIdent
 	_ = ctxIdent
-	for _, msg := range f.Messages {
+
+	msgs := make([]*protogen.Message, 0, len(f.Messages))
+	forEachMessage(f.Messages, func(m *protogen.Message) {
+		msgs = append(msgs, m)
+		msgs = append(msgs, messagesFromFields(m.Fields)...)
+	})
+	for _, msg := range msgs {
 		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
@@ -59,6 +65,23 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 		g.P("}")
 		g.P()
 	}
+}
+
+func forEachMessage(msgs []*protogen.Message, f func(m *protogen.Message)) {
+	for _, msg := range msgs {
+		f(msg)
+	}
+}
+
+func messagesFromFields(f []*protogen.Field) []*protogen.Message {
+	msgs := make([]*protogen.Message, 0)
+	for _, field := range f {
+		if field.Desc.Kind() != protoreflect.MessageKind {
+			continue
+		}
+		msgs = append(msgs, field.Message)
+	}
+	return msgs
 }
 
 type FieldAttribute struct {
