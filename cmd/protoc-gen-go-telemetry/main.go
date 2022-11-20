@@ -48,12 +48,19 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 	_ = traceIdent
 	_ = ctxIdent
 
-	msgs := make([]*protogen.Message, 0, len(f.Messages))
+	msgs := make(MessageSet)
 	forEachMessage(f.Messages, func(m *protogen.Message) {
-		msgs = append(msgs, m)
-		msgs = append(msgs, messagesFromFields(m.Fields)...)
+		msgs.Add(m.GoIdent.String(), m)
+		for _, v := range messagesFromFields(m.Fields) {
+			msgs.Add(v.GoIdent.String(), v)
+		}
 	})
+
 	for _, msg := range msgs {
+		if msg.GoIdent.GoImportPath != f.GoImportPath {
+			debug(msg.GoIdent.String(), "is unsupported. GoImportPath does not match")
+			continue
+		}
 		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
@@ -108,7 +115,7 @@ func newField(field *protogen.Field) FieldAttribute {
 
 func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
 	if f.attrKind == "" {
-		fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
+		// fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
 		return
 	}
 
@@ -139,4 +146,26 @@ func attributeFromKind(k protoreflect.Kind) (string, string) {
 	default:
 		return "", ""
 	}
+}
+
+type MessageSet map[string]*protogen.Message
+
+func (m MessageSet) Add(k string, v *protogen.Message) {
+	if _, ok := m[k]; !ok {
+		m[k] = v
+	}
+}
+
+func (m MessageSet) Keys() []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+
+func debug(s ...string) {
+	fmt.Fprintln(os.Stderr, s)
 }
