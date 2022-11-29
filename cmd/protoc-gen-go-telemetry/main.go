@@ -47,7 +47,15 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 	_ = attributeIdent
 	_ = traceIdent
 	_ = ctxIdent
-	for _, msg := range f.Messages {
+
+	msgs := collectMessages(f.Messages)
+
+	for _, msg := range msgs {
+		if msg.GoIdent.GoImportPath != f.GoImportPath {
+			debug(msg.GoIdent.String(), "is unsupported. GoImportPath does not match")
+			continue
+		}
+		debug("generating fields for messages", msg.GoIdent.String())
 		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
@@ -59,6 +67,35 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 		g.P("}")
 		g.P()
 	}
+}
+
+func collectMessages(msgs []*protogen.Message) MessageSet {
+	set := make(MessageSet)
+	for _, m := range msgs {
+		debug("adding message", m.GoIdent.GoName, "to set")
+		set.Add(m.GoIdent.String(), m)
+		messageField := collectMessages(messagesFromFields(m.Fields))
+		for _, localMsg := range messageField {
+			debug("adding message", m.GoIdent.GoName, "to set")
+			set.Add(localMsg.GoIdent.String(), localMsg)
+		}
+		for _, localMsg := range m.Messages {
+			debug("adding message", m.GoIdent.GoName, "to set")
+			set.Add(localMsg.GoIdent.String(), localMsg)
+		}
+	}
+	return set
+}
+
+func messagesFromFields(f []*protogen.Field) []*protogen.Message {
+	msgs := make([]*protogen.Message, 0)
+	for _, field := range f {
+		if field.Desc.Kind() != protoreflect.MessageKind {
+			continue
+		}
+		msgs = append(msgs, field.Message)
+	}
+	return msgs
 }
 
 type FieldAttribute struct {
@@ -85,7 +122,7 @@ func newField(field *protogen.Field) FieldAttribute {
 
 func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
 	if f.attrKind == "" {
-		fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
+		// fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
 		return
 	}
 
@@ -116,4 +153,26 @@ func attributeFromKind(k protoreflect.Kind) (string, string) {
 	default:
 		return "", ""
 	}
+}
+
+type MessageSet map[string]*protogen.Message
+
+func (m MessageSet) Add(k string, v *protogen.Message) {
+	if _, ok := m[k]; !ok {
+		m[k] = v
+	}
+}
+
+func (m MessageSet) Keys() []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+
+func debug(s ...string) {
+	fmt.Fprintln(os.Stderr, s)
 }

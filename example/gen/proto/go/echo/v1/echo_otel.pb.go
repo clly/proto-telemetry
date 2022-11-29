@@ -25,6 +25,13 @@ func (x *MessageDetails) TraceAttributes(ctx context.Context) {
 	)
 }
 
+func (x *EchoRequest_Envelope) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("echorequest.envelope.name", x.Name),
+	)
+}
+
 func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
