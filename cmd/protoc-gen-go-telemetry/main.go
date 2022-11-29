@@ -48,19 +48,14 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 	_ = traceIdent
 	_ = ctxIdent
 
-	msgs := make(MessageSet)
-	forEachMessage(f.Messages, func(m *protogen.Message) {
-		msgs.Add(m.GoIdent.String(), m)
-		for _, v := range messagesFromFields(m.Fields) {
-			msgs.Add(v.GoIdent.String(), v)
-		}
-	})
+	msgs := collectMessages(f.Messages)
 
 	for _, msg := range msgs {
 		if msg.GoIdent.GoImportPath != f.GoImportPath {
 			debug(msg.GoIdent.String(), "is unsupported. GoImportPath does not match")
 			continue
 		}
+		debug("generating fields for messages", msg.GoIdent.String())
 		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
@@ -74,10 +69,22 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 	}
 }
 
-func forEachMessage(msgs []*protogen.Message, f func(m *protogen.Message)) {
-	for _, msg := range msgs {
-		f(msg)
+func collectMessages(msgs []*protogen.Message) MessageSet {
+	set := make(MessageSet)
+	for _, m := range msgs {
+		debug("adding message", m.GoIdent.GoName, "to set")
+		set.Add(m.GoIdent.String(), m)
+		messageField := collectMessages(messagesFromFields(m.Fields))
+		for _, localMsg := range messageField {
+			debug("adding message", m.GoIdent.GoName, "to set")
+			set.Add(localMsg.GoIdent.String(), localMsg)
+		}
+		for _, localMsg := range m.Messages {
+			debug("adding message", m.GoIdent.GoName, "to set")
+			set.Add(localMsg.GoIdent.String(), localMsg)
+		}
 	}
+	return set
 }
 
 func messagesFromFields(f []*protogen.Field) []*protogen.Message {
