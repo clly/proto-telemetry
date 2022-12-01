@@ -1,27 +1,40 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/clly/protoc-telemetry-go/cmd/pkg/fields"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+type config struct {
+	includeMap bool
+}
+
 func main() {
-	protogen.Options{}.Run(func(p *protogen.Plugin) error {
+	var flags flag.FlagSet
+	includeMap := flags.Bool("include-map", false, "include map key/values in trace span")
+	opts := &protogen.Options{
+		ParamFunc: flags.Set,
+	}
+	cfg := config{includeMap: *includeMap}
+
+	opts.Run(func(p *protogen.Plugin) error {
 		for _, f := range p.Files {
 			if !f.Generate {
 				continue
 			}
-			generateFile(p, f)
+			generateFile(p, f, cfg)
 		}
 		return nil
 	})
 }
 
-func generateFile(gen *protogen.Plugin, f *protogen.File) {
+func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	filename := f.GeneratedFilenamePrefix + "_otel.pb.go"
 
 	g := gen.NewGeneratedFile(filename, f.GoImportPath)
@@ -44,6 +57,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 		GoImportPath: "context",
 	})
 
+	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
 	_ = attributeIdent
 	_ = traceIdent
 	_ = ctxIdent
@@ -55,6 +69,9 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 			debug(msg.GoIdent.String(), "is unsupported. GoImportPath does not match")
 			continue
 		}
+		if msg.Desc.IsMapEntry() {
+			continue
+		}
 		debug("generating fields for messages", msg.GoIdent.String())
 		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
 		g.P("span := trace.SpanFromContext(ctx)")
@@ -64,6 +81,12 @@ func generateFile(gen *protogen.Plugin, f *protogen.File) {
 			f.Generate(g)
 		}
 		g.P(")")
+		// map bits
+		for _, field := range msg.Fields {
+			if field.Desc.IsMap() {
+				fields.NewMapGenerator(field).Generate(g)
+			}
+		}
 		g.P("}")
 		g.P()
 	}
@@ -93,6 +116,11 @@ func messagesFromFields(f []*protogen.Field) []*protogen.Message {
 		if field.Desc.Kind() != protoreflect.MessageKind {
 			continue
 		}
+		if field.Desc.IsMap() {
+			debug(field.GoName, "is map")
+			fmt.Fprintf(os.Stderr, "%#v\n", field.Desc.MapKey().Kind().String())
+			continue
+		}
 		msgs = append(msgs, field.Message)
 	}
 	return msgs
@@ -107,6 +135,7 @@ type FieldAttribute struct {
 }
 
 func newField(field *protogen.Field) FieldAttribute {
+
 	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
 	attrName = strings.ToLower(attrName)
 	attrKind, castCall := attributeFromKind(field.Desc.Kind())
