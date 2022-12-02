@@ -15,6 +15,7 @@ message EchoRequest {
   message Envelope {
     string name = 1;
   }
+  map<string, string> meta = 6;
 }
 
 message MessageDetails {

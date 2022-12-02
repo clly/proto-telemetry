@@ -4,19 +4,10 @@ package echov1
 
 import (
 	context "context"
+	fmt "fmt"
 	attribute "go.opentelemetry.io/otel/attribute"
 	trace "go.opentelemetry.io/otel/trace"
 )
-
-func (x *EchoRequest) TraceAttributes(ctx context.Context) {
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("echorequest.msg", x.Msg),
-		attribute.Int64("echorequest.num32", int64(x.Num32)),
-		attribute.Int64("echorequest.unum32", int64(x.Unum32)),
-		attribute.Int64("echorequest.num64", int64(x.Num64)),
-	)
-}
 
 func (x *MessageDetails) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
@@ -37,4 +28,19 @@ func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	span.SetAttributes(
 		attribute.String("echoresponse.msg", x.Msg),
 	)
+}
+
+func (x *EchoRequest) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("echorequest.msg", x.Msg),
+		attribute.Int64("echorequest.num32", int64(x.Num32)),
+		attribute.Int64("echorequest.unum32", int64(x.Unum32)),
+		attribute.Int64("echorequest.num64", int64(x.Num64)),
+	)
+	for m, v := range x.GetMeta() {
+		span.SetAttributes(
+			attribute.String(fmt.Sprintf("echorequest.meta_%s", m), v),
+		)
+	}
 }
