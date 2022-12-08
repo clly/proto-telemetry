@@ -77,8 +77,15 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
 		for _, field := range msg.Fields {
-			f := newField(field)
-			f.Generate(g)
+			if field.Desc.IsList() {
+				debug("Generating List field for", field.GoName)
+				f := fields.NewListGenerator(field)
+
+				f.Generate(g)
+			} else {
+				f := newField(field)
+				f.Generate(g)
+			}
 		}
 		g.P(")")
 		// map bits
@@ -135,7 +142,6 @@ type FieldAttribute struct {
 }
 
 func newField(field *protogen.Field) FieldAttribute {
-
 	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
 	attrName = strings.ToLower(attrName)
 	attrKind, castCall := attributeFromKind(field.Desc.Kind())

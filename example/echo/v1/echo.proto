@@ -25,6 +25,7 @@ message MessageDetails {
 message EchoResponse {
   string msg = 1;
   google.type.DateTime now = 2;
+  repeated string forward = 3;
 }
 
 service EchoService {
