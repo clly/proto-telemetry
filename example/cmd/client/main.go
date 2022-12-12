@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	echov1 "github.com/clly/protoc-telemetry-go/example/gen/proto/go/echo/v1"
-	"github.com/clly/protoc-telemetry-go/example/tracing"
+	echov1 "github.com/clly/proto-telemetry/example/gen/proto/go/echo/v1"
+	"github.com/clly/proto-telemetry/example/tracing"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 )

@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/clly/protoc-telemetry-go/cmd/pkg/fields"
+	"github.com/clly/proto-telemetry/cmd/pkg/fields"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
