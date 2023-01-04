@@ -22,9 +22,9 @@ func GetTelemetryPackage(file *descriptor.FileDescriptorProto) string {
 	return ""
 }
 
-func GetTelemetryFieldExclude(field *descriptor.FieldDescriptorProto) bool {
+func GetTelemetryFieldExclude(field *descriptor.FieldDescriptorProto, defaultValue bool) bool {
 	if field == nil || field.Options == nil {
-		return true
+		return defaultValue
 	}
 
 	e := proto.GetExtension(field.Options, optionsv1.E_Exclude)
@@ -33,5 +33,5 @@ func GetTelemetryFieldExclude(field *descriptor.FieldDescriptorProto) bool {
 		return *s
 	}
 
-	return true
+	return defaultValue
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/clly/proto-telemetry/cmd/pkg/fields"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -152,6 +153,11 @@ func newField(field *protogen.Field) FieldAttribute {
 func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
 	if f.attrKind == "" {
 		// fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
+		return
+	}
+
+	if GetTelemetryFieldExclude(protodesc.ToFieldDescriptorProto(f.field.Desc), false) {
+		debug(f.field.GoName, "is marked as excluded")
 		return
 	}
 

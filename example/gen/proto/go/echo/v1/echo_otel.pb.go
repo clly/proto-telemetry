@@ -23,6 +23,13 @@ func (x *EchoRequest_Envelope) TraceAttributes(ctx context.Context) {
 	)
 }
 
+func (x *EchoResponse) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("echoresponse.msg", x.Msg),
+	)
+}
+
 func (x *Foo) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes()
@@ -42,11 +49,4 @@ func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 			attribute.String(fmt.Sprintf("echorequest.meta_%s", m), v),
 		)
 	}
-}
-
-func (x *EchoResponse) TraceAttributes(ctx context.Context) {
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("echoresponse.msg", x.Msg),
-	)
 }
