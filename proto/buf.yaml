@@ -1,8 +1,7 @@
 version: v1
-name: buf.build/clly/echo
+name: buf.build/clly/telemetry
 deps:
   - buf.build/googleapis/googleapis
-  - buf.build/clly/telemetry
 breaking:
   use:
     - FILE

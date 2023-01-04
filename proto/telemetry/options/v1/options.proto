@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package telemetry.options.v1;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/clly/proto-telemetry/proto;v1";
+
+extend google.protobuf.FileOptions {
+  string telemetry_package = 10000;
+}
+
+extend google.protobuf.FieldOptions {
+  string exclude = 10000;
+}
+
+message TestMessage {
+  string foo = 1 [(exclude) = "true"];
+}

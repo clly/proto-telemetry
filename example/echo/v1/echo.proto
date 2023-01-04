@@ -3,6 +3,7 @@ syntax = "proto3";
 package echo.v1;
 
 import "google/type/datetime.proto";
+import "telemetry/options/v1/options.proto";
 
 option go_package = "github.com/clly/protoc-telemetry-go/example/gen/go/echo/v1;echov1";
 
@@ -16,6 +17,7 @@ message EchoRequest {
     string name = 1;
   }
   map<string, string> meta = 6;
+  string sender = 7 [(telemetry.options.v1.exclude) = "true"];
 }
 
 message MessageDetails {
@@ -25,6 +27,10 @@ message MessageDetails {
 message EchoResponse {
   string msg = 1;
   google.type.DateTime now = 2;
+}
+
+message Foo {
+  telemetry.options.v1.TestMessage foo = 1;
 }
 
 service EchoService {

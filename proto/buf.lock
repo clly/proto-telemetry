@@ -2,10 +2,6 @@
 version: v1
 deps:
   - remote: buf.build
-    owner: clly
-    repository: telemetry
-    commit: c80b28d331474c01afb300d80bafc27c
-  - remote: buf.build
     owner: googleapis
     repository: googleapis
     commit: faacf837d7304c58b7c9020c7807fa6e

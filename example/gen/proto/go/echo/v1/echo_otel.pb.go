@@ -30,6 +30,11 @@ func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	)
 }
 
+func (x *Foo) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes()
+}
+
 func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
@@ -37,6 +42,7 @@ func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 		attribute.Int64("echorequest.num32", int64(x.Num32)),
 		attribute.Int64("echorequest.unum32", int64(x.Unum32)),
 		attribute.Int64("echorequest.num64", int64(x.Num64)),
+		attribute.String("echorequest.sender", x.Sender),
 	)
 	for m, v := range x.GetMeta() {
 		span.SetAttributes(
