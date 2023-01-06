@@ -1,4 +1,4 @@
-package main
+package options
 
 import (
 	optionsv1 "github.com/clly/proto-telemetry/proto/telemetry/options/v1"

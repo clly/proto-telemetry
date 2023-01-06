@@ -1,4 +1,4 @@
-package fields
+package generators
 
 import (
 	"strings"
@@ -6,15 +6,19 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
+type generator interface {
+	Generate(g *protogen.GeneratedFile)
+}
+
+type Generator[T generator] struct {
+	typeGen T
+}
+
 type MapGenerator struct {
 	m *protogen.Field
 }
 
 func MessageGenerator(m *protogen.Message) {
-
-}
-
-func FieldGenerator(f *protogen.Field) {
 
 }
 

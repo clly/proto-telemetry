@@ -4,11 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/clly/proto-telemetry/cmd/pkg/fields"
+	fields "github.com/clly/proto-telemetry/cmd/pkg/generators"
 	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -44,24 +42,9 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	g.P("package ", f.GoPackageName)
 	g.P()
 
-	attributeIdent := g.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "attribute",
-		GoImportPath: "go.opentelemetry.io/otel/attribute",
-	})
-
-	traceIdent := g.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "trace",
-		GoImportPath: "go.opentelemetry.io/otel/trace",
-	})
-
-	ctxIdent := g.QualifiedGoIdent(protogen.GoIdent{
-		GoImportPath: "context",
-	})
-
 	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
-	_ = attributeIdent
-	_ = traceIdent
-	_ = ctxIdent
+	fileGen := fields.NewFileGenerator(g)
+	fileGen.Generate(g)
 
 	msgs := collectMessages(f.Messages)
 
@@ -78,7 +61,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
 		for _, field := range msg.Fields {
-			f := newField(field)
+			f := fields.NewFieldGenerator(field)
 			f.Generate(g)
 		}
 		g.P(")")
@@ -125,69 +108,6 @@ func messagesFromFields(f []*protogen.Field) []*protogen.Message {
 		msgs = append(msgs, field.Message)
 	}
 	return msgs
-}
-
-type FieldAttribute struct {
-	field    *protogen.Field
-	goName   string
-	attrName string
-	attrKind string
-	castCall string
-}
-
-func newField(field *protogen.Field) FieldAttribute {
-
-	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
-	attrName = strings.ToLower(attrName)
-	attrKind, castCall := attributeFromKind(field.Desc.Kind())
-
-	return FieldAttribute{
-		attrName: attrName,
-		attrKind: attrKind,
-		castCall: castCall,
-		goName:   field.GoName,
-		field:    field,
-	}
-}
-
-func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
-	if f.attrKind == "" {
-		// fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
-		return
-	}
-
-	if GetTelemetryFieldExclude(protodesc.ToFieldDescriptorProto(f.field.Desc), false) {
-		debug(f.field.GoName, "is marked as excluded")
-		return
-	}
-
-	var s string
-	if f.castCall == "" {
-		s = fmt.Sprintf(`attribute.%s("%s", x.%s),`, f.attrKind, f.attrName, f.goName)
-	} else {
-
-		s = fmt.Sprintf(`attribute.%s("%s", %s(x.%s)),`, f.attrKind, f.attrName, f.castCall, f.goName)
-	}
-
-	g.P(s)
-}
-
-func attributeFromKind(k protoreflect.Kind) (string, string) {
-
-	switch k {
-	case protoreflect.BoolKind:
-		return "Bool", ""
-	case protoreflect.Int32Kind, protoreflect.Int64Kind,
-		protoreflect.DoubleKind, protoreflect.FloatKind,
-		protoreflect.Fixed32Kind, protoreflect.Fixed64Kind,
-		protoreflect.Sfixed32Kind, protoreflect.Sfixed64Kind,
-		protoreflect.Uint32Kind, protoreflect.Uint64Kind:
-		return "Int64", "int64"
-	case protoreflect.StringKind:
-		return "String", ""
-	default:
-		return "", ""
-	}
 }
 
 type MessageSet map[string]*protogen.Message
