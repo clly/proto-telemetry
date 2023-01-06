@@ -9,27 +9,6 @@ import (
 	trace "go.opentelemetry.io/otel/trace"
 )
 
-func (x *MessageDetails) TraceAttributes(ctx context.Context) {
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("messagedetails.details", x.Details),
-	)
-}
-
-func (x *EchoRequest_Envelope) TraceAttributes(ctx context.Context) {
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("echorequest.envelope.name", x.Name),
-	)
-}
-
-func (x *EchoResponse) TraceAttributes(ctx context.Context) {
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("echoresponse.msg", x.Msg),
-	)
-}
-
 func (x *Foo) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes()
@@ -49,4 +28,25 @@ func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 			attribute.String(fmt.Sprintf("echorequest.meta_%s", m), v),
 		)
 	}
+}
+
+func (x *MessageDetails) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("messagedetails.details", x.Details),
+	)
+}
+
+func (x *EchoResponse) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("echoresponse.msg", x.Msg),
+	)
+}
+
+func (x *EchoRequest_Envelope) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("echorequest.envelope.name", x.Name),
+	)
 }

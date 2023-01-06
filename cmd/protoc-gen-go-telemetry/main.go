@@ -42,24 +42,9 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	g.P("package ", f.GoPackageName)
 	g.P()
 
-	attributeIdent := g.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "attribute",
-		GoImportPath: "go.opentelemetry.io/otel/attribute",
-	})
-
-	traceIdent := g.QualifiedGoIdent(protogen.GoIdent{
-		GoName:       "trace",
-		GoImportPath: "go.opentelemetry.io/otel/trace",
-	})
-
-	ctxIdent := g.QualifiedGoIdent(protogen.GoIdent{
-		GoImportPath: "context",
-	})
-
 	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
-	_ = attributeIdent
-	_ = traceIdent
-	_ = ctxIdent
+	fileGen := fields.NewFileGenerator(g)
+	fileGen.Generate(g)
 
 	msgs := collectMessages(f.Messages)
 

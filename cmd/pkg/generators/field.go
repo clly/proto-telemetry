@@ -7,6 +7,7 @@ import (
 	"github.com/clly/proto-telemetry/cmd/pkg/options"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protodesc"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type FieldAttribute struct {
@@ -17,8 +18,29 @@ type FieldAttribute struct {
 	castCall string
 }
 
-func newField(field *protogen.Field) FieldAttribute {
+func NewFieldGenerator(f *protogen.Field) FieldAttribute {
+	return newField(f)
+}
 
+func attributeFromKind(k protoreflect.Kind) (string, string) {
+
+	switch k {
+	case protoreflect.BoolKind:
+		return "Bool", ""
+	case protoreflect.Int32Kind, protoreflect.Int64Kind,
+		protoreflect.DoubleKind, protoreflect.FloatKind,
+		protoreflect.Fixed32Kind, protoreflect.Fixed64Kind,
+		protoreflect.Sfixed32Kind, protoreflect.Sfixed64Kind,
+		protoreflect.Uint32Kind, protoreflect.Uint64Kind:
+		return "Int64", "int64"
+	case protoreflect.StringKind:
+		return "String", ""
+	default:
+		return "", ""
+	}
+}
+
+func newField(field *protogen.Field) FieldAttribute {
 	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
 	attrName = strings.ToLower(attrName)
 	attrKind, castCall := attributeFromKind(field.Desc.Kind())
