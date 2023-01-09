@@ -9,6 +9,13 @@ import (
 	trace "go.opentelemetry.io/otel/trace"
 )
 
+func (x *EchoResponse) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("echoresponse.msg", x.Msg),
+	)
+}
+
 func (x *Foo) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes()
@@ -34,13 +41,6 @@ func (x *MessageDetails) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
 		attribute.String("messagedetails.details", x.Details),
-	)
-}
-
-func (x *EchoResponse) TraceAttributes(ctx context.Context) {
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("echoresponse.msg", x.Msg),
 	)
 }
 

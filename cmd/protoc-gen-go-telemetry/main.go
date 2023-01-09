@@ -2,31 +2,36 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"os"
 
 	fields "github.com/clly/proto-telemetry/cmd/pkg/generators"
+	"github.com/clly/proto-telemetry/cmd/pkg/logger"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type config struct {
 	includeMap bool
+	logLevel   int
 }
 
 func main() {
 	var flags flag.FlagSet
 	includeMap := flags.Bool("include-map", false, "include map key/values in trace span")
+	logLevel := flags.Int("loglevel", 0, "Set the log level. Higher numbers add more logging, Tops out at 3")
 	opts := &protogen.Options{
 		ParamFunc: flags.Set,
 	}
-	cfg := config{includeMap: *includeMap}
 
 	opts.Run(func(p *protogen.Plugin) error {
 		for _, f := range p.Files {
 			if !f.Generate {
 				continue
 			}
+			cfg := config{
+				includeMap: *includeMap,
+				logLevel:   *logLevel,
+			}
+
 			generateFile(p, f, cfg)
 		}
 		return nil
@@ -43,6 +48,8 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	g.P()
 
 	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
+
+	setLogger(cfg.logLevel)
 	fileGen := fields.NewFileGenerator(g)
 	fileGen.Generate(g)
 
@@ -56,7 +63,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 		if msg.Desc.IsMapEntry() {
 			continue
 		}
-		debug("generating fields for messages", msg.GoIdent.String())
+		debug("generating fields for messages", msg.GoIdent.GoName)
 		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
 		g.P("span := trace.SpanFromContext(ctx)")
 		g.P("span.SetAttributes(")
@@ -101,8 +108,7 @@ func messagesFromFields(f []*protogen.Field) []*protogen.Message {
 			continue
 		}
 		if field.Desc.IsMap() {
-			debug(field.GoName, "is map")
-			fmt.Fprintf(os.Stderr, "%#v\n", field.Desc.MapKey().Kind().String())
+			logger.Default().Debug(field.GoName, "is map")
 			continue
 		}
 		msgs = append(msgs, field.Message)
@@ -128,6 +134,28 @@ func (m MessageSet) Keys() []string {
 	return keys
 }
 
+func setLogger(i int) {
+	var l logger.LogLevel
+	if i < 0 {
+		l = logger.Error
+	} else if i > 3 {
+		l = logger.Debug
+	}
+	switch i {
+	case 0:
+		l = logger.Error
+	case 1:
+		l = logger.Warn
+	case 2:
+		l = logger.Info
+	case 3:
+		l = logger.Debug
+	default:
+	}
+
+	logger.SetLevel(l)
+}
+
 func debug(s ...string) {
-	fmt.Fprintln(os.Stderr, s)
+	logger.Default().Debug(s...)
 }
