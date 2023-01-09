@@ -12,4 +12,6 @@ plugins:
       - require_unimplemented_servers=false
   - name: go-telemetry
     out: gen/proto/go
-    opt: paths=source_relative
+    opt:
+      - paths=source_relative
+      - loglevel=3
