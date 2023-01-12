@@ -8,8 +8,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 )
 
 func Init() (func(), error) {
@@ -29,7 +29,7 @@ func Init() (func(), error) {
 }
 
 // newExporter returns a console exporter.
-func newExporter(w io.Writer) (trace.SpanExporter, error) {
+func newExporter(w io.Writer) (sdktrace.SpanExporter, error) {
 	return stdouttrace.New(
 		stdouttrace.WithWriter(w),
 		// Use human-readable output.
@@ -37,4 +37,16 @@ func newExporter(w io.Writer) (trace.SpanExporter, error) {
 		// Do not print timestamps for the demo.
 		stdouttrace.WithoutTimestamps(),
 	)
+}
+
+func TestInit() (func(), *tracetest.InMemoryExporter, error) {
+	exporter := tracetest.NewInMemoryExporter()
+	ssp := sdktrace.NewSimpleSpanProcessor(exporter)
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(ssp))
+	shutdown := func() { _ = tp.Shutdown(context.Background()) }
+	otel.SetTracerProvider(tp)
+
+	// set global propagator to baggage (the default is no-op).
+	otel.SetTextMapPropagator(propagation.Baggage{})
+	return shutdown, exporter, nil
 }
