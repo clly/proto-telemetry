@@ -88,12 +88,11 @@ func collectMessages(msgs []*protogen.Message) MessageSet {
 	for _, m := range msgs {
 		debug("adding message", m.GoIdent.GoName, "to set")
 		set.Add(m.GoIdent.String(), m)
-		messageField := collectMessages(messagesFromFields(m.Fields))
-		for _, localMsg := range messageField {
-			debug("adding message", m.GoIdent.GoName, "to set")
-			set.Add(localMsg.GoIdent.String(), localMsg)
-		}
 		for _, localMsg := range m.Messages {
+			childSet := collectMessages(localMsg.Messages)
+			for k, v := range childSet {
+				set.Add(k, v)
+			}
 			debug("adding message", m.GoIdent.GoName, "to set")
 			set.Add(localMsg.GoIdent.String(), localMsg)
 		}
