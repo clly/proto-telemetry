@@ -15,6 +15,9 @@ message EchoRequest {
   MessageDetails details = 5;
   message Envelope {
     string name = 1;
+    message Letter {
+      string contents = 1;
+    }
   }
   map<string, string> meta = 6;
   string sender = 7 [(telemetry.options.v1.exclude) = "true"];
