@@ -24,6 +24,10 @@ func (m Message) Children() []Message {
 	return kids
 }
 
+func (m Message) Proto() *protogen.Message {
+	return m.m
+}
+
 func getChildren(protoM *protogen.Message) []Message {
 	set := make(messageSet)
 	for _, m := range protoM.Messages {

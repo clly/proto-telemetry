@@ -6,7 +6,6 @@ import (
 	fields "github.com/clly/proto-telemetry/cmd/pkg/generators"
 	"github.com/clly/proto-telemetry/cmd/pkg/logger"
 	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type config struct {
@@ -56,6 +55,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	msgs := collectMessages(f.Messages)
 
 	for _, msg := range msgs {
+		msg := msg.Proto()
 		if msg.GoIdent.GoImportPath != f.GoImportPath {
 			debug(msg.GoIdent.String(), "is unsupported. GoImportPath does not match")
 			continue
@@ -83,54 +83,19 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	}
 }
 
-func collectMessages(msgs []*protogen.Message) MessageSet {
-	set := make(MessageSet)
+func collectMessages(msgs []*protogen.Message) []fields.Message {
+	messages := make([]fields.Message, 0, len(msgs))
 	for _, m := range msgs {
-		debug("adding message", m.GoIdent.GoName, "to set")
-		set.Add(m.GoIdent.String(), m)
-		for _, localMsg := range m.Messages {
-			childSet := collectMessages(localMsg.Messages)
-			for k, v := range childSet {
-				set.Add(k, v)
-			}
-			debug("adding message", m.GoIdent.GoName, "to set")
-			set.Add(localMsg.GoIdent.String(), localMsg)
+		fieldMessage := fields.MessageGenerator(m)
+		messages = append(messages, fieldMessage)
+		debug("found message", m.GoIdent.GoName, "for generation")
+
+		for _, child := range fieldMessage.Children() {
+			messages = append(messages, child)
+			debug("found child message", m.GoIdent.GoName, "for generation")
 		}
 	}
-	return set
-}
-
-func messagesFromFields(f []*protogen.Field) []*protogen.Message {
-	msgs := make([]*protogen.Message, 0)
-	for _, field := range f {
-		if field.Desc.Kind() != protoreflect.MessageKind {
-			continue
-		}
-		if field.Desc.IsMap() {
-			logger.Default().Debug(field.GoName, "is map")
-			continue
-		}
-		msgs = append(msgs, field.Message)
-	}
-	return msgs
-}
-
-type MessageSet map[string]*protogen.Message
-
-func (m MessageSet) Add(k string, v *protogen.Message) {
-	if _, ok := m[k]; !ok {
-		m[k] = v
-	}
-}
-
-func (m MessageSet) Keys() []string {
-	keys := make([]string, len(m))
-	i := 0
-	for k := range m {
-		keys[i] = k
-		i++
-	}
-	return keys
+	return messages
 }
 
 func setLogger(i int) {
