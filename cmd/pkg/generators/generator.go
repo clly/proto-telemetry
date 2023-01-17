@@ -18,10 +18,6 @@ type MapGenerator struct {
 	m *protogen.Field
 }
 
-func MessageGenerator(m *protogen.Message) {
-
-}
-
 func NewMapGenerator(m *protogen.Field) *MapGenerator {
 	return &MapGenerator{
 		m: m,
