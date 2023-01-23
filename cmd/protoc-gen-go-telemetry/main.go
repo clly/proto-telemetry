@@ -54,8 +54,8 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 
 	msgs := collectMessages(f.Messages)
 
-	for _, msg := range msgs {
-		msg := msg.Proto()
+	for _, msgGenerator := range msgs {
+		msg := msgGenerator.Proto()
 		if msg.GoIdent.GoImportPath != f.GoImportPath {
 			debug(msg.GoIdent.String(), "is unsupported. GoImportPath does not match")
 			continue
@@ -64,22 +64,9 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 			continue
 		}
 		debug("generating fields for messages", msg.GoIdent.GoName)
-		g.P("func (x *", msg.GoIdent, ") TraceAttributes(ctx context.Context) {")
-		g.P("span := trace.SpanFromContext(ctx)")
-		g.P("span.SetAttributes(")
-		for _, field := range msg.Fields {
-			f := fields.NewFieldGenerator(field)
-			f.Generate(g)
-		}
-		g.P(")")
-		// map bits
-		for _, field := range msg.Fields {
-			if field.Desc.IsMap() {
-				fields.NewMapGenerator(field).Generate(g)
-			}
-		}
-		g.P("}")
-		g.P()
+		msgGenerator.Generate(g)
+
+		msgGenerator.Tail(g)
 	}
 }
 

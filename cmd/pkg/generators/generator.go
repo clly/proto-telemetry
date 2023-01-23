@@ -18,7 +18,7 @@ type MapGenerator struct {
 	m *protogen.Field
 }
 
-func NewMapGenerator(m *protogen.Field) *MapGenerator {
+func NewMapGenerator(m *protogen.Field) generator {
 	return &MapGenerator{
 		m: m,
 	}

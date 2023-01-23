@@ -1,6 +1,8 @@
 package generators
 
 import (
+	"sort"
+
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -8,6 +10,7 @@ type Message struct {
 	children []Message
 	m        *protogen.Message
 	fields   []FieldAttribute
+	trailers []generator
 }
 
 func MessageGenerator(m *protogen.Message) Message {
@@ -15,6 +18,19 @@ func MessageGenerator(m *protogen.Message) Message {
 		m:        m,
 		children: getChildren(m),
 	}
+
+	for _, f := range m.Fields {
+		field := NewFieldGenerator(f)
+		if field.isTrailer {
+			if field.field.Desc.IsMap() {
+				msg.trailers = append(msg.trailers, field.g)
+			}
+		} else {
+			msg.fields = append(msg.fields, field)
+		}
+
+	}
+
 	return msg
 }
 
@@ -26,6 +42,31 @@ func (m Message) Children() []Message {
 
 func (m Message) Proto() *protogen.Message {
 	return m.m
+}
+
+func (m Message) Generate(g *protogen.GeneratedFile) {
+	g.P("func (x *", m.m.GoIdent, ") TraceAttributes(ctx context.Context) {")
+	g.P("span := trace.SpanFromContext(ctx)")
+	g.P("span.SetAttributes(")
+
+	for _, field := range m.m.Fields {
+		f := NewFieldGenerator(field)
+		f.Generate(g)
+	}
+	g.P(")")
+
+	m.trailerFields(g)
+}
+
+func (m Message) trailerFields(g *protogen.GeneratedFile) {
+	for _, f := range m.trailers {
+		f.Generate(g)
+	}
+}
+
+func (m Message) Tail(g *protogen.GeneratedFile) {
+	g.P("}")
+	g.P()
 }
 
 func getChildren(protoM *protogen.Message) []Message {
@@ -68,6 +109,9 @@ func (m messageSet) Messages() []Message {
 	for _, v := range m {
 		slice = append(slice, v)
 	}
+	sort.Slice(slice, func(i, j int) bool {
+		return slice[i].m.GoIdent.GoName < slice[j].m.GoIdent.GoName
+	})
 	return slice
 }
 
