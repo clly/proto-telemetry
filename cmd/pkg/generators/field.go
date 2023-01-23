@@ -17,6 +17,7 @@ type FieldAttribute struct {
 	attrKind  string
 	castCall  string
 	isTrailer bool
+	g         generator
 }
 
 func NewFieldGenerator(f *protogen.Field) FieldAttribute {
@@ -49,19 +50,21 @@ func newField(field *protogen.Field) FieldAttribute {
 	attrName = strings.ToLower(attrName)
 	attrKind, castCall := attributeFromKind(field.Desc.Kind())
 
-	var isTrailer bool
-	if field.Desc.IsMap() {
-		isTrailer = true
+	fa := FieldAttribute{
+		attrName: attrName,
+		attrKind: attrKind,
+		castCall: castCall,
+		goName:   field.GoName,
+		field:    field,
 	}
 
-	return FieldAttribute{
-		attrName:  attrName,
-		attrKind:  attrKind,
-		castCall:  castCall,
-		goName:    field.GoName,
-		field:     field,
-		isTrailer: isTrailer,
+	if field.Desc.IsMap() {
+		fa.isTrailer = true
+		mg := NewMapGenerator(field)
+		fa.g = mg
 	}
+
+	return fa
 }
 
 func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {

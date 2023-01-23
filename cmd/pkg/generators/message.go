@@ -8,7 +8,7 @@ type Message struct {
 	children []Message
 	m        *protogen.Message
 	fields   []FieldAttribute
-	trailers []FieldAttribute
+	trailers []generator
 }
 
 func MessageGenerator(m *protogen.Message) Message {
@@ -20,10 +20,13 @@ func MessageGenerator(m *protogen.Message) Message {
 	for _, f := range m.Fields {
 		field := NewFieldGenerator(f)
 		if field.isTrailer {
-			msg.trailers = append(msg.trailers, field)
+			if field.field.Desc.IsMap() {
+				msg.trailers = append(msg.trailers, field.g)
+			}
 		} else {
 			msg.fields = append(msg.fields, field)
 		}
+
 	}
 
 	return msg
@@ -49,6 +52,14 @@ func (m Message) Generate(g *protogen.GeneratedFile) {
 		f.Generate(g)
 	}
 	g.P(")")
+
+	m.trailerFields(g)
+}
+
+func (m Message) trailerFields(g *protogen.GeneratedFile) {
+	for _, f := range m.trailers {
+		f.Generate(g)
+	}
 }
 
 func (m Message) Tail(g *protogen.GeneratedFile) {

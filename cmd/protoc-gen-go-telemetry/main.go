@@ -66,12 +66,6 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 		debug("generating fields for messages", msg.GoIdent.GoName)
 		msgGenerator.Generate(g)
 
-		// map bits
-		for _, field := range msg.Fields {
-			if field.Desc.IsMap() {
-				fields.NewMapGenerator(field).Generate(g)
-			}
-		}
 		msgGenerator.Tail(g)
 	}
 }
