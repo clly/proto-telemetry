@@ -11,19 +11,23 @@ import (
 )
 
 type FieldAttribute struct {
-	field    *protogen.Field
-	goName   string
-	attrName string
-	attrKind string
-	castCall string
+	field     *protogen.Field
+	goName    string
+	attrName  string
+	attrKind  string
+	castCall  string
+	isTrailer bool
 }
 
 func NewFieldGenerator(f *protogen.Field) FieldAttribute {
 	return newField(f)
 }
 
-func attributeFromKind(k protoreflect.Kind) (string, string) {
+func (f *FieldAttribute) IsTrailer() bool {
+	return f.isTrailer
+}
 
+func attributeFromKind(k protoreflect.Kind) (string, string) {
 	switch k {
 	case protoreflect.BoolKind:
 		return "Bool", ""
@@ -45,12 +49,18 @@ func newField(field *protogen.Field) FieldAttribute {
 	attrName = strings.ToLower(attrName)
 	attrKind, castCall := attributeFromKind(field.Desc.Kind())
 
+	var isTrailer bool
+	if field.Desc.IsMap() {
+		isTrailer = true
+	}
+
 	return FieldAttribute{
-		attrName: attrName,
-		attrKind: attrKind,
-		castCall: castCall,
-		goName:   field.GoName,
-		field:    field,
+		attrName:  attrName,
+		attrKind:  attrKind,
+		castCall:  castCall,
+		goName:    field.GoName,
+		field:     field,
+		isTrailer: isTrailer,
 	}
 }
 
