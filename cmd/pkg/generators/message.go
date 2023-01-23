@@ -1,6 +1,8 @@
 package generators
 
 import (
+	"sort"
+
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -107,6 +109,9 @@ func (m messageSet) Messages() []Message {
 	for _, v := range m {
 		slice = append(slice, v)
 	}
+	sort.Slice(slice, func(i, j int) bool {
+		return slice[i].m.GoIdent.GoName < slice[j].m.GoIdent.GoName
+	})
 	return slice
 }
 
