@@ -8,6 +8,7 @@ type Message struct {
 	children []Message
 	m        *protogen.Message
 	fields   []FieldAttribute
+	trailers []FieldAttribute
 }
 
 func MessageGenerator(m *protogen.Message) Message {
@@ -15,6 +16,16 @@ func MessageGenerator(m *protogen.Message) Message {
 		m:        m,
 		children: getChildren(m),
 	}
+
+	for _, f := range m.Fields {
+		field := NewFieldGenerator(f)
+		if field.isTrailer {
+			msg.trailers = append(msg.trailers, field)
+		} else {
+			msg.fields = append(msg.fields, field)
+		}
+	}
+
 	return msg
 }
 
@@ -26,6 +37,23 @@ func (m Message) Children() []Message {
 
 func (m Message) Proto() *protogen.Message {
 	return m.m
+}
+
+func (m Message) Generate(g *protogen.GeneratedFile) {
+	g.P("func (x *", m.m.GoIdent, ") TraceAttributes(ctx context.Context) {")
+	g.P("span := trace.SpanFromContext(ctx)")
+	g.P("span.SetAttributes(")
+
+	for _, field := range m.m.Fields {
+		f := NewFieldGenerator(field)
+		f.Generate(g)
+	}
+	g.P(")")
+}
+
+func (m Message) Tail(g *protogen.GeneratedFile) {
+	g.P("}")
+	g.P()
 }
 
 func getChildren(protoM *protogen.Message) []Message {
