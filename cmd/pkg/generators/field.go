@@ -67,7 +67,7 @@ func newField(field *protogen.Field) FieldAttribute {
 	return fa
 }
 
-func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
+func (f *FieldAttribute) Generate(g *protogen.GeneratedFile, named bool) {
 	if f.attrKind == "" {
 		// fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
 		return
@@ -77,12 +77,16 @@ func (f *FieldAttribute) Generate(g *protogen.GeneratedFile) {
 		return
 	}
 
+	var key = fmt.Sprintf(`"%s"`, f.attrName)
+	if named {
+		key = fmt.Sprintf(`pfx+".%s"`, f.attrName)
+	}
 	var s string
 	if f.castCall == "" {
-		s = fmt.Sprintf(`attribute.%s("%s", x.%s),`, f.attrKind, f.attrName, f.goName)
+		s = fmt.Sprintf(`attribute.%s(%s, x.%s),`, f.attrKind, key, f.goName)
 	} else {
 
-		s = fmt.Sprintf(`attribute.%s("%s", %s(x.%s)),`, f.attrKind, f.attrName, f.castCall, f.goName)
+		s = fmt.Sprintf(`attribute.%s(%s, %s(x.%s)),`, f.attrKind, key, f.castCall, f.goName)
 	}
 
 	g.P(s)

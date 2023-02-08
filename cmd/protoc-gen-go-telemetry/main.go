@@ -50,7 +50,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 
 	setLogger(cfg.logLevel)
 	fileGen := fields.NewFileGenerator(g)
-	fileGen.Generate(g)
+	fileGen.Generate(g, false)
 
 	msgs := collectMessages(f.Messages)
 
@@ -65,8 +65,11 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 			continue
 		}
 		debug("generating fields for messages", msg.GoIdent.GoName)
-		msgGenerator.Generate(g)
+		msgGenerator.Generate(g, false)
 
+		msgGenerator.Tail(g)
+
+		msgGenerator.Generate(g, true)
 		msgGenerator.Tail(g)
 	}
 }

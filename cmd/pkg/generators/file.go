@@ -19,8 +19,8 @@ func NewFileGenerator(g *protogen.GeneratedFile) *FileGenerator[*opentelemetryGe
 	}
 }
 
-func (f *FileGenerator[T]) Generate(g *protogen.GeneratedFile) {
-	f.telemetry.Generate(g)
+func (f *FileGenerator[T]) Generate(g *protogen.GeneratedFile, named bool) {
+	f.telemetry.Generate(g, named)
 }
 
 type opentelemetryGenerator struct {
@@ -29,7 +29,7 @@ type opentelemetryGenerator struct {
 	ctxIdent       string
 }
 
-func (o *opentelemetryGenerator) Generate(g *protogen.GeneratedFile) {
+func (o *opentelemetryGenerator) Generate(g *protogen.GeneratedFile, named bool) {
 	o.attributeIdent = g.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "attribute",
 		GoImportPath: "go.opentelemetry.io/otel/attribute",
@@ -47,6 +47,6 @@ func (o *opentelemetryGenerator) Generate(g *protogen.GeneratedFile) {
 
 type opencensusGenerator struct{}
 
-func (o *opencensusGenerator) Generate(g *protogen.GeneratedFile) {
+func (o *opencensusGenerator) Generate(g *protogen.GeneratedFile, named bool) {
 
 }

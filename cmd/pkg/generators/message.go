@@ -44,23 +44,28 @@ func (m Message) Proto() *protogen.Message {
 	return m.m
 }
 
-func (m Message) Generate(g *protogen.GeneratedFile) {
-	g.P("func (x *", m.m.GoIdent, ") TraceAttributes(ctx context.Context) {")
+func (m Message) Generate(g *protogen.GeneratedFile, named bool) {
+	var signature = "TraceAttributes(ctx context.Context) {"
+	if named {
+		signature = "NamedAttributes(ctx context.Context, pfx string) {"
+	}
+	g.P("func (x *", m.m.GoIdent, ")", signature)
 	g.P("span := trace.SpanFromContext(ctx)")
 	g.P("span.SetAttributes(")
 
 	for _, field := range m.m.Fields {
 		f := NewFieldGenerator(field)
-		f.Generate(g)
+		f.Generate(g, named)
 	}
 	g.P(")")
 
-	m.trailerFields(g)
+	m.trailerFields(g, named)
+
 }
 
-func (m Message) trailerFields(g *protogen.GeneratedFile) {
+func (m Message) trailerFields(g *protogen.GeneratedFile, named bool) {
 	for _, f := range m.trailers {
-		f.Generate(g)
+		f.Generate(g, named)
 	}
 }
 
