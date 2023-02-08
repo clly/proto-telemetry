@@ -25,10 +25,33 @@ func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 	}
 }
 
+func (x *EchoRequest) NamedAttributes(ctx context.Context, pfx string) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String(pfx+".echorequest.msg", x.Msg),
+		attribute.Int64(pfx+".echorequest.num32", int64(x.Num32)),
+		attribute.Int64(pfx+".echorequest.unum32", int64(x.Unum32)),
+		attribute.Int64(pfx+".echorequest.num64", int64(x.Num64)),
+		attribute.String(pfx+".echorequest.sender", x.Sender),
+	)
+	for m, v := range x.GetMeta() {
+		span.SetAttributes(
+			attribute.String(fmt.Sprintf("pfx.echorequest.meta_%s", m), v),
+		)
+	}
+}
+
 func (x *EchoRequest_Envelope) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
 		attribute.String("echorequest.envelope.name", x.Name),
+	)
+}
+
+func (x *EchoRequest_Envelope) NamedAttributes(ctx context.Context, pfx string) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String(pfx+".echorequest.envelope.name", x.Name),
 	)
 }
 
@@ -39,6 +62,13 @@ func (x *MessageDetails) TraceAttributes(ctx context.Context) {
 	)
 }
 
+func (x *MessageDetails) NamedAttributes(ctx context.Context, pfx string) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String(pfx+".messagedetails.details", x.Details),
+	)
+}
+
 func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
@@ -46,7 +76,19 @@ func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	)
 }
 
+func (x *EchoResponse) NamedAttributes(ctx context.Context, pfx string) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String(pfx+".echoresponse.msg", x.Msg),
+	)
+}
+
 func (x *Foo) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes()
+}
+
+func (x *Foo) NamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes()
 }

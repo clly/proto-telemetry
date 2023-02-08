@@ -8,11 +8,19 @@ import (
 	"github.com/google/uuid"
 )
 
-func BenchmarkTraceActivity(b *testing.B) {
+func BenchmarkTraceAttributes(b *testing.B) {
 	var msg = generateMessage()
 	ctx := context.Background()
 	for i := 0; i < b.N; i++ {
 		msg.TraceAttributes(ctx)
+	}
+}
+
+func BenchmarkNamedAttributes(b *testing.B) {
+	var msg = generateMessage()
+	ctx := context.Background()
+	for i := 0; i < b.N; i++ {
+		msg.NamedAttributes(ctx, "resource")
 	}
 }
 
