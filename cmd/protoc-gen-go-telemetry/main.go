@@ -61,6 +61,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 			continue
 		}
 		if msg.Desc.IsMapEntry() {
+			debug("Skipping map entry", msg.GoIdent.GoName)
 			continue
 		}
 		debug("generating fields for messages", msg.GoIdent.GoName)
