@@ -7,7 +7,7 @@
 package echov1
 
 import (
-	_ "github.com/clly/proto-telemetry/proto"
+	_ "github.com/clly/proto-telemetry/proto/telemetry/options/v1"
 	datetime "google.golang.org/genproto/googleapis/type/datetime"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
