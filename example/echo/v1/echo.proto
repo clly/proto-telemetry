@@ -9,7 +9,7 @@ option go_package = "github.com/clly/protoc-telemetry-go/example/gen/go/echo/v1;
 
 message EchoRequest {
   string msg = 1;
-  int32 num32 = 2;
+  int32 num32 = 2 [(telemetry.options.v1.field_name) = "number"];
   uint32 unum32 = 3;
   int64 num64 = 4;
   MessageDetails details = 5;
