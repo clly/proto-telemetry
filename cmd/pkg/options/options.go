@@ -29,8 +29,22 @@ func GetTelemetryFieldExclude(field *descriptor.FieldDescriptorProto, defaultVal
 
 	e := proto.GetExtension(field.Options, optionsv1.E_Exclude)
 
-	if s, ok := e.(*bool); ok {
-		return *s
+	if s, ok := e.(bool); ok {
+		return s
+	}
+
+	return defaultValue
+}
+
+func GetTelemetryFieldName(field *descriptor.FieldDescriptorProto, defaultValue string) string {
+	if field == nil || field.Options == nil {
+		return defaultValue
+	}
+
+	e := proto.GetExtension(field.Options, optionsv1.E_FieldName)
+
+	if s, ok := e.(string); ok {
+		return s
 	}
 
 	return defaultValue

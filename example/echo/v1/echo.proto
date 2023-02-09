@@ -9,7 +9,7 @@ option go_package = "github.com/clly/protoc-telemetry-go/example/gen/go/echo/v1;
 
 message EchoRequest {
   string msg = 1;
-  int32 num32 = 2;
+  int32 num32 = 2 [(telemetry.options.v1.field_name) = "number"];
   uint32 unum32 = 3;
   int64 num64 = 4;
   MessageDetails details = 5;
@@ -20,7 +20,7 @@ message EchoRequest {
     }
   }
   map<string, string> meta = 6;
-  string sender = 7 [(telemetry.options.v1.exclude) = "true"];
+  string sender = 7 [(telemetry.options.v1.exclude) = true];
 }
 
 message MessageDetails {
@@ -30,10 +30,6 @@ message MessageDetails {
 message EchoResponse {
   string msg = 1;
   google.type.DateTime now = 2;
-}
-
-message Foo {
-  telemetry.options.v1.TestMessage foo = 1;
 }
 
 service EchoService {

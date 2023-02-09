@@ -4,16 +4,21 @@ package telemetry.options.v1;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package = "github.com/clly/proto-telemetry/proto;v1";
+option go_package = "github.com/clly/proto-telemetry/proto/telemetry/options/v1;v1";
 
 extend google.protobuf.FileOptions {
   string telemetry_package = 10000;
 }
 
 extend google.protobuf.FieldOptions {
-  string exclude = 10000;
+  bool exclude = 10000;
+  string field_name = 10001;
 }
 
-message TestMessage {
-  string foo = 1 [(exclude) = "true"];
+extend google.protobuf.MessageOptions {
+  bool exclude_message = 10010;
+}
+
+extend google.protobuf.FileOptions {
+  bool exclude_file = 10020;
 }

@@ -50,6 +50,8 @@ func newField(field *protogen.Field) FieldAttribute {
 	attrName = strings.ToLower(attrName)
 	attrKind, castCall := attributeFromKind(field.Desc.Kind())
 
+	attrName = options.GetTelemetryFieldName(protodesc.ToFieldDescriptorProto(field.Desc), attrName)
+
 	fa := FieldAttribute{
 		attrName: attrName,
 		attrKind: attrKind,

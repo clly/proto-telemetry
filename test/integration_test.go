@@ -62,6 +62,11 @@ func Test_IntegrationWithoutMap(t *testing.T) {
 				mapIter(pfx+"."+name, m, val.Field(i))
 				continue
 			}
+            // num32 is testing custom field_name
+            if name == "num32" {
+                m["number"] = val.Field(i).Interface()
+                continue
+            }
 			m[pfx+"."+name] = val.Field(i).Interface()
 		}
 	}
