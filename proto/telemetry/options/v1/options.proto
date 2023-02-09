@@ -11,9 +11,14 @@ extend google.protobuf.FileOptions {
 }
 
 extend google.protobuf.FieldOptions {
-  string exclude = 10000;
+  bool exclude = 10000;
+  string field_name = 10001;
 }
 
-message TestMessage {
-  string foo = 1 [(exclude) = "true"];
+extend google.protobuf.MessageOptions {
+  bool exclude_message = 10010;
+}
+
+extend google.protobuf.FileOptions {
+  bool exclude_file = 10020;
 }
