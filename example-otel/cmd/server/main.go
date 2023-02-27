@@ -11,8 +11,8 @@ import (
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/grpc"
 
-	echov1 "github.com/clly/proto-telemetry/example/gen/proto/go/echo/v1"
-	"github.com/clly/proto-telemetry/example/tracing"
+	echov1 "github.com/clly/proto-telemetry/example-otel/gen/proto/go/echo/v1"
+	"github.com/clly/proto-telemetry/example-otel/tracing"
 )
 
 func main() {
