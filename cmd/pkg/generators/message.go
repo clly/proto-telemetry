@@ -52,7 +52,7 @@ func (m Message) Generate(f *FileGenerator, named bool) {
 	}
 	g.P("func (x *", m.m.GoIdent, ")", signature)
 	g.P(f.Telemetry.Span())
-	g.P("span.SetAttributes(")
+	g.P(f.Telemetry.Attribute(), "(")
 
 	for _, field := range m.m.Fields {
 		f := NewFieldGenerator(field, f.Telemetry)

@@ -15,7 +15,8 @@ type FileGenerator struct {
 type TelemetryBackend interface {
 	generator
 	Span() string
-	Attribute(k protoreflect.Kind) string
+	AttributeType(k protoreflect.Kind) string
+	Attribute() string
 }
 
 func NewFileGenerator(g *protogen.GeneratedFile, gen TelemetryBackend) *FileGenerator {
@@ -58,7 +59,11 @@ func (o *OpentelemetryGenerator) Span() string {
 	return fmt.Sprintf("span := %s.SpanFromContext(ctx)", o.traceIdent)
 }
 
-func (o *OpentelemetryGenerator) Attribute(k protoreflect.Kind) string {
+func (o *OpentelemetryGenerator) Attribute() string {
+	return "span.SetAttributes"
+}
+
+func (o *OpentelemetryGenerator) AttributeType(k protoreflect.Kind) string {
 	switch k {
 	case protoreflect.StringKind:
 		return fmt.Sprintf("%s.String", o.attributeIdent)
@@ -76,6 +81,7 @@ func (o *OpentelemetryGenerator) Attribute(k protoreflect.Kind) string {
 type OpencensusGenerator struct {
 	traceIdent     string
 	attributeIdent string
+	ctxIdent       string
 }
 
 func (o *OpencensusGenerator) Generate(fileGenerator *FileGenerator, named bool) {
@@ -83,15 +89,19 @@ func (o *OpencensusGenerator) Generate(fileGenerator *FileGenerator, named bool)
 		GoName:       "trace",
 		GoImportPath: "go.opencensus.io/trace",
 	})
+	o.ctxIdent = fileGenerator.g.QualifiedGoIdent(protogen.GoIdent{
+		GoImportPath: "context",
+	})
 
-	o.attributeIdent = o.traceIdent
+	o.attributeIdent = "trace"
+
 }
 
 func (o *OpencensusGenerator) Span() string {
 	return "span := trace.FromContext(ctx)"
 }
 
-func (o *OpencensusGenerator) Attribute(k protoreflect.Kind) string {
+func (o *OpencensusGenerator) AttributeType(k protoreflect.Kind) string {
 	switch k {
 	case protoreflect.StringKind:
 		return fmt.Sprintf("%s.StringAttribute", o.attributeIdent)
@@ -104,4 +114,8 @@ func (o *OpencensusGenerator) Attribute(k protoreflect.Kind) string {
 	default:
 		return ""
 	}
+}
+
+func (o *OpencensusGenerator) Attribute() string {
+	return "span.AddAttributes"
 }

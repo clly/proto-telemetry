@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 type generator interface {
@@ -33,9 +34,9 @@ func (m *MapGenerator) Generate(f *FileGenerator, named bool) {
 	}
 
 	g.P("for m, v := range x.Get", m.m.GoName, "() {")
-	g.P("span.SetAttributes(")
+	g.P(f.Telemetry.Attribute(), "(")
 	// g.P(`attribute.String("`, strings.ToLower(m.m.Parent.GoIdent.GoName), `.`, strings.ToLower(m.m.GoName), `_%s, x.Msg),`)
-	g.P(`attribute.String(fmt.Sprintf("`, key, `_%s", m), v),`)
+	g.P(f.Telemetry.AttributeType(protoreflect.StringKind), `(fmt.Sprintf("`, key, `_%s", m), v),`)
 	// g.P("attribute.String(", strings.ToLower(m.m.Parent.GoIdent.GoName), ", v)")
 	g.P(")")
 	g.P("}")

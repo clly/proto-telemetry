@@ -31,7 +31,7 @@ func (f *FieldAttribute) IsTrailer() bool {
 }
 
 func attributeFromKind(t TelemetryBackend, k protoreflect.Kind) (string, string) {
-	attribute := t.Attribute(k)
+	attribute := t.AttributeType(k)
 	switch k {
 	case protoreflect.BoolKind:
 		return attribute, ""
