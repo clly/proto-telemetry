@@ -1,0 +1,11 @@
+version: v1
+name: buf.build/clly/echo
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/clly/telemetry
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
