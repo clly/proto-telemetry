@@ -8,8 +8,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 
-	echov1 "github.com/clly/proto-telemetry/example-otel/gen/proto/go/echo/v1"
-	"github.com/clly/proto-telemetry/example-otel/tracing"
+	echov1 "github.com/clly/proto-telemetry/example-oc/gen/proto/go/ocecho/v1"
+	"github.com/clly/proto-telemetry/example-oc/tracing"
 )
 
 func main() {
@@ -22,16 +22,12 @@ func run() error {
 	connectTo := "127.0.0.1:8080"
 	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
-		return fmt.Errorf("failed to connect to echo service at %s: %w", connectTo, err)
+		return fmt.Errorf("failed to connect to ocecho service at %s: %w", connectTo, err)
 	}
 	log.Println("connected to", connectTo)
 
-	shutdown, err := tracing.Init()
-	if err != nil {
-		return err
-	}
-	defer shutdown()
-
+	tracing.Init()
+	
 	echo := echov1.NewEchoServiceClient(conn)
 
 	ctx := context.Background()

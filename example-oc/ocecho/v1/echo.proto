@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package echo.v1;
+package ocecho.v1;
 
 import "google/type/datetime.proto";
 import "telemetry/options/v1/options.proto";
 
-option go_package = "github.com/clly/protoc-telemetry-go/example/gen/go/echo/v1;echov1";
+option go_package = "github.com/clly/protoc-telemetry-go/example-oc/gen/go/ocecho/v1;ocechov1";
 
 message EchoRequest {
   string msg = 1;

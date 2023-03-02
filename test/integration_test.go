@@ -8,29 +8,41 @@ import (
 	"strings"
 	"testing"
 
-	echov1 "github.com/clly/proto-telemetry/example/gen/proto/go/echo/v1"
-	"github.com/clly/proto-telemetry/example/tracing"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+	"go.opencensus.io/trace"
 	"go.opentelemetry.io/otel"
+
+	ocechov1 "github.com/clly/proto-telemetry/example-oc/gen/proto/go/ocecho/v1"
+	octracing "github.com/clly/proto-telemetry/example-oc/tracing"
+	otelechov1 "github.com/clly/proto-telemetry/example-otel/gen/proto/go/otecho/v1"
+	oteltracing "github.com/clly/proto-telemetry/example-otel/tracing"
 )
 
-func Test_IntegrationWithoutMap(t *testing.T) {
+type IntegrationSuite struct {
+	suite.Suite
+}
+
+func (s *IntegrationSuite) SetupTest() {
 	wd, err := os.Getwd()
-	require.NoError(t, err)
+	require.NoError(s.T(), err)
 
 	cmd := exec.Cmd{
 		Path: "run-dev.sh",
 		Dir:  wd + "/../",
 	}
-	output, err := cmd.CombinedOutput()
-	require.NoError(t, err, string(output))
 
-	req := &echov1.EchoRequest{
+	output, err := cmd.CombinedOutput()
+	require.NoError(s.T(), err, string(output))
+}
+
+func echoRequest() *otelechov1.EchoRequest {
+	return &otelechov1.EchoRequest{
 		Msg:    "msg",
 		Num32:  1,
 		Unum32: 2,
 		Num64:  3,
-		Details: &echov1.MessageDetails{
+		Details: &otelechov1.MessageDetails{
 			Details: "signed-by: bob",
 		},
 		Meta: map[string]string{
@@ -38,8 +50,29 @@ func Test_IntegrationWithoutMap(t *testing.T) {
 		},
 		Sender: "cindy",
 	}
+}
 
-	shutdown, exporter, err := tracing.TestInit()
+func ocEchoRequest() *ocechov1.EchoRequest {
+	return &ocechov1.EchoRequest{
+		Msg:    "msg",
+		Num32:  1,
+		Unum32: 2,
+		Num64:  3,
+		Details: &ocechov1.MessageDetails{
+			Details: "signed-by: bob",
+		},
+		Meta: map[string]string{
+			"reply-to": "hello@gmail.com",
+		},
+		Sender: "cindy",
+	}
+}
+
+func (s *IntegrationSuite) Test_IntegrationOpenTelemetryWithMap() {
+	t := s.T()
+	req := ocEchoRequest()
+
+	shutdown, exporter, err := oteltracing.TestInit()
 	defer shutdown()
 	require.NoError(t, err)
 
@@ -62,11 +95,11 @@ func Test_IntegrationWithoutMap(t *testing.T) {
 				mapIter(pfx+"."+name, m, val.Field(i))
 				continue
 			}
-            // num32 is testing custom field_name
-            if name == "num32" {
-                m["number"] = val.Field(i).Interface()
-                continue
-            }
+			// num32 is testing custom field_name
+			if name == "num32" {
+				m["number"] = val.Field(i).Interface()
+				continue
+			}
 			m[pfx+"."+name] = val.Field(i).Interface()
 		}
 	}
@@ -80,9 +113,62 @@ func Test_IntegrationWithoutMap(t *testing.T) {
 	}
 }
 
+func (s *IntegrationSuite) Test_IntegrationOpenCensus() {
+	t := s.T()
+	req := echoRequest()
+
+	exporter := octracing.TestInit()
+
+	ctx := context.Background()
+	ctx, span := trace.StartSpan(ctx, "Echo")
+	req.TraceAttributes(ctx)
+	span.End()
+
+	spanData := exporter.SpanData
+	require.Len(t, spanData, 1)
+	testspan := spanData[0]
+	val := reflect.ValueOf(req).Elem()
+
+	pfx := strings.ToLower(val.Type().Name())
+	m := map[string]any{}
+	for i := 0; i < val.Type().NumField(); i++ {
+		if val.Type().Field(i).IsExported() {
+			name := strings.ToLower(val.Type().Field(i).Name)
+			if val.Field(i).Type().Kind() == reflect.Map {
+				mapIter(pfx+"."+name, m, val.Field(i))
+				continue
+			}
+			// num32 is testing custom field_name
+			if name == "num32" {
+				m["number"] = val.Field(i).Interface()
+				continue
+			}
+			m[pfx+"."+name] = val.Field(i).Interface()
+		}
+	}
+
+	for key, attrVal := range testspan.Attributes {
+		val, ok := m[string(key)]
+		if !ok {
+			require.Fail(t, "unknown key traced", key)
+		}
+		require.EqualValues(t, val, attrVal)
+	}
+}
+
 func mapIter(pfx string, m map[string]any, val reflect.Value) {
 	iter := val.MapRange()
 	for iter.Next() {
 		m[pfx+"_"+iter.Key().String()] = iter.Value().Interface()
 	}
+}
+
+// In order for 'go test' to run this suite, we need to create
+// a normal test function and pass our suite to suite.Run
+func Test_TelemetryIntegrationTestSuite(t *testing.T) {
+	suite.Run(t, new(IntegrationSuite))
+}
+
+func (t *IntegrationSuite) TestTrue() {
+	t.Suite.True(true)
 }

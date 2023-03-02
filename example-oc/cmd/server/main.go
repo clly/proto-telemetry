@@ -11,8 +11,9 @@ import (
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/grpc"
 
-	echov1 "github.com/clly/proto-telemetry/example-otel/gen/proto/go/echo/v1"
-	"github.com/clly/proto-telemetry/example-otel/tracing"
+	echov1 "github.com/clly/proto-telemetry/example-oc/gen/proto/go/ocecho/v1"
+
+	"github.com/clly/proto-telemetry/example-oc/tracing"
 )
 
 func main() {
@@ -28,11 +29,7 @@ func run() error {
 		return fmt.Errorf("failed to listen on %s: %w", listen, err)
 	}
 
-	shutdown, err := tracing.Init()
-	if err != nil {
-		return err
-	}
-	defer shutdown()
+	tracing.Init()
 
 	server := grpc.NewServer()
 	echov1.RegisterEchoServiceServer(server, &svr{})
