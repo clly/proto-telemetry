@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	examplepb "github.com/clly/proto-telemetry/example/gen/proto/go/echo/v1"
 	"github.com/google/uuid"
+
+	examplepb "github.com/clly/proto-telemetry/example-otel/gen/proto/go/otecho/v1"
 )
 
 func BenchmarkTraceAttributes(b *testing.B) {

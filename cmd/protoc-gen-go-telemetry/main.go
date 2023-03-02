@@ -3,20 +3,24 @@ package main
 import (
 	"flag"
 
+	"google.golang.org/protobuf/compiler/protogen"
+
+	"github.com/clly/proto-telemetry/cmd/pkg/generators"
 	fields "github.com/clly/proto-telemetry/cmd/pkg/generators"
 	"github.com/clly/proto-telemetry/cmd/pkg/logger"
-	"google.golang.org/protobuf/compiler/protogen"
 )
 
 type config struct {
-	includeMap bool
-	logLevel   int
+	includeMap       bool
+	logLevel         int
+	telemetryBackend string
 }
 
 func main() {
 	var flags flag.FlagSet
 	includeMap := flags.Bool("include-map", false, "include map key/values in trace span")
 	logLevel := flags.Int("loglevel", 0, "Set the log level. Higher numbers add more logging, Tops out at 3")
+	telemetryBackend := flags.String("telemetry-backend", "opentelemetry", "Telemetry implementation to use. Supports opentelemetry or opencensus")
 	opts := &protogen.Options{
 		ParamFunc: flags.Set,
 	}
@@ -27,8 +31,9 @@ func main() {
 				continue
 			}
 			cfg := config{
-				includeMap: *includeMap,
-				logLevel:   *logLevel,
+				includeMap:       *includeMap,
+				logLevel:         *logLevel,
+				telemetryBackend: *telemetryBackend,
 			}
 
 			generateFile(p, f, cfg)
@@ -49,10 +54,19 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
 
 	setLogger(cfg.logLevel)
-	fileGen := fields.NewFileGenerator(g)
-	fileGen.Generate(g, false)
 
-	msgs := collectMessages(f.Messages)
+	var fileGen *fields.FileGenerator
+	switch cfg.telemetryBackend {
+	case "opentelemetry":
+		fileGen = fields.NewFileGenerator(g, &generators.OpentelemetryGenerator{})
+	case "opencensus":
+		fileGen = fields.NewFileGenerator(g, &generators.OpencensusGenerator{})
+
+	}
+
+	fileGen.Generate(false)
+
+	msgs := collectMessages(f.Messages, fileGen.Telemetry)
 
 	for _, msgGenerator := range msgs {
 		msg := msgGenerator.Proto()
@@ -65,19 +79,19 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 			continue
 		}
 		debug("generating fields for messages", msg.GoIdent.GoName)
-		msgGenerator.Generate(g, false)
+		msgGenerator.Generate(fileGen, false)
 
 		msgGenerator.Tail(g)
 
-		msgGenerator.Generate(g, true)
+		msgGenerator.Generate(fileGen, true)
 		msgGenerator.Tail(g)
 	}
 }
 
-func collectMessages(msgs []*protogen.Message) []fields.Message {
+func collectMessages(msgs []*protogen.Message, t fields.TelemetryBackend) []fields.Message {
 	messages := make([]fields.Message, 0, len(msgs))
 	for _, m := range msgs {
-		fieldMessage := fields.MessageGenerator(m)
+		fieldMessage := fields.MessageGenerator(m, t)
 		messages = append(messages, fieldMessage)
 		debug("found message", m.GoIdent.GoName, "for generation")
 

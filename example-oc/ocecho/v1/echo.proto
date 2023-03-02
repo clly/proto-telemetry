@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package ocecho.v1;
+
+import "google/type/datetime.proto";
+import "telemetry/options/v1/options.proto";
+
+option go_package = "github.com/clly/protoc-telemetry-go/example-oc/gen/go/ocecho/v1;ocechov1";
+
+message EchoRequest {
+  string msg = 1;
+  int32 num32 = 2 [(telemetry.options.v1.field_name) = "number"];
+  uint32 unum32 = 3;
+  int64 num64 = 4;
+  MessageDetails details = 5;
+  message Envelope {
+    string name = 1;
+    message Letter {
+      string contents = 1;
+    }
+  }
+  map<string, string> meta = 6;
+  string sender = 7 [(telemetry.options.v1.exclude) = true];
+}
+
+message MessageDetails {
+  string details = 1;
+}
+
+message EchoResponse {
+  string msg = 1;
+  google.type.DateTime now = 2;
+}
+
+service EchoService {
+  rpc Echo(EchoRequest) returns (EchoResponse) {}
+}

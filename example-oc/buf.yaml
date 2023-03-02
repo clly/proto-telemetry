@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/clly/echo
+name: buf.build/clly/ocecho
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/clly/telemetry

@@ -4,51 +4,54 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/clly/proto-telemetry/cmd/pkg/options"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
+
+	"github.com/clly/proto-telemetry/cmd/pkg/options"
 )
 
 type FieldAttribute struct {
-	field     *protogen.Field
-	goName    string
-	attrName  string
-	attrKind  string
-	castCall  string
-	isTrailer bool
-	g         generator
+	field              *protogen.Field
+	goName             string
+	attrName           string
+	attrKind           string
+	castCall           string
+	isTrailer          bool
+	g                  generator
+	telemetryGenerator TelemetryBackend
 }
 
-func NewFieldGenerator(f *protogen.Field) FieldAttribute {
-	return newField(f)
+func NewFieldGenerator(f *protogen.Field, t TelemetryBackend) FieldAttribute {
+	return newField(f, t)
 }
 
 func (f *FieldAttribute) IsTrailer() bool {
 	return f.isTrailer
 }
 
-func attributeFromKind(k protoreflect.Kind) (string, string) {
+func attributeFromKind(t TelemetryBackend, k protoreflect.Kind) (string, string) {
+	attribute := t.AttributeType(k)
 	switch k {
 	case protoreflect.BoolKind:
-		return "Bool", ""
+		return attribute, ""
 	case protoreflect.Int32Kind, protoreflect.Int64Kind,
 		protoreflect.DoubleKind, protoreflect.FloatKind,
 		protoreflect.Fixed32Kind, protoreflect.Fixed64Kind,
 		protoreflect.Sfixed32Kind, protoreflect.Sfixed64Kind,
 		protoreflect.Uint32Kind, protoreflect.Uint64Kind:
-		return "Int64", "int64"
+		return attribute, "int64"
 	case protoreflect.StringKind:
-		return "String", ""
+		return attribute, ""
 	default:
 		return "", ""
 	}
 }
 
-func newField(field *protogen.Field) FieldAttribute {
+func newField(field *protogen.Field, t TelemetryBackend) FieldAttribute {
 	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
 	attrName = strings.ToLower(attrName)
-	attrKind, castCall := attributeFromKind(field.Desc.Kind())
+	attrKind, castCall := attributeFromKind(t, field.Desc.Kind())
 
 	attrName = options.GetTelemetryFieldName(protodesc.ToFieldDescriptorProto(field.Desc), attrName)
 
@@ -85,10 +88,10 @@ func (f *FieldAttribute) Generate(g *protogen.GeneratedFile, named bool) {
 	}
 	var s string
 	if f.castCall == "" {
-		s = fmt.Sprintf(`attribute.%s(%s, x.%s),`, f.attrKind, key, f.goName)
+		s = fmt.Sprintf(`%s(%s, x.%s),`, f.attrKind, key, f.goName)
 	} else {
 
-		s = fmt.Sprintf(`attribute.%s(%s, %s(x.%s)),`, f.attrKind, key, f.castCall, f.goName)
+		s = fmt.Sprintf(`%s(%s, %s(x.%s)),`, f.attrKind, key, f.castCall, f.goName)
 	}
 
 	g.P(s)

@@ -1,2 +1,5 @@
-example/client
-example/server
+example-otel/client
+example-otel/server
+
+example-oc/client
+example-oc/server
