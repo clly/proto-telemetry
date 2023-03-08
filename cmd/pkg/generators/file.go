@@ -13,7 +13,7 @@ type FileGenerator struct {
 }
 
 type TelemetryBackend interface {
-	generator
+	Imports(g *protogen.GeneratedFile)
 	Span() string
 	AttributeType(k protoreflect.Kind) string
 	Attribute() string
@@ -26,8 +26,8 @@ func NewFileGenerator(g *protogen.GeneratedFile, gen TelemetryBackend) *FileGene
 	}
 }
 
-func (f *FileGenerator) Generate(named bool) {
-	f.Telemetry.Generate(f, named)
+func (f *FileGenerator) Generate() {
+	f.Telemetry.Imports(f.g)
 }
 
 type OpentelemetryGenerator struct {
@@ -36,8 +36,7 @@ type OpentelemetryGenerator struct {
 	ctxIdent       string
 }
 
-func (o *OpentelemetryGenerator) Generate(fileGenerator *FileGenerator, named bool) {
-	g := fileGenerator.g
+func (o *OpentelemetryGenerator) Imports(g *protogen.GeneratedFile) {
 	g.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "attribute",
 		GoImportPath: "go.opentelemetry.io/otel/attribute",
@@ -84,12 +83,12 @@ type OpencensusGenerator struct {
 	ctxIdent       string
 }
 
-func (o *OpencensusGenerator) Generate(fileGenerator *FileGenerator, named bool) {
-	o.traceIdent = fileGenerator.g.QualifiedGoIdent(protogen.GoIdent{
+func (o *OpencensusGenerator) Imports(g *protogen.GeneratedFile) {
+	o.traceIdent = g.QualifiedGoIdent(protogen.GoIdent{
 		GoName:       "trace",
 		GoImportPath: "go.opencensus.io/trace",
 	})
-	o.ctxIdent = fileGenerator.g.QualifiedGoIdent(protogen.GoIdent{
+	o.ctxIdent = g.QualifiedGoIdent(protogen.GoIdent{
 		GoImportPath: "context",
 	})
 

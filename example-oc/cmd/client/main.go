@@ -27,7 +27,7 @@ func run() error {
 	log.Println("connected to", connectTo)
 
 	tracing.Init()
-	
+
 	echo := echov1.NewEchoServiceClient(conn)
 
 	ctx := context.Background()

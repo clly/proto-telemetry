@@ -46,7 +46,7 @@ func Test_Message(t *testing.T) {
 
 			msgs := []Message{}
 			for _, testMsg := range testMessages {
-				msg := MessageGenerator(testMsg)
+				msg := MessageGenerator(testMsg, &OpentelemetryGenerator{})
 				msgs = append(msgs, msg)
 			}
 

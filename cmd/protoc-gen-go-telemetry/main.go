@@ -64,7 +64,7 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 
 	}
 
-	fileGen.Generate(false)
+	fileGen.Generate()
 
 	msgs := collectMessages(f.Messages, fileGen.Telemetry)
 
