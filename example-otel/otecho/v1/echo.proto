@@ -24,6 +24,7 @@ message EchoRequest {
 }
 
 message MessageDetails {
+  option (telemetry.options.v1.exclude_message) = true;
   string details = 1;
 }
 

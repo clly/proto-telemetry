@@ -113,6 +113,35 @@ func (s *IntegrationSuite) Test_IntegrationOpenTelemetryWithMap() {
 	}
 }
 
+func (s *IntegrationSuite) Test_ExcludeMessage() {
+	t := s.T()
+	req := &otelechov1.MessageDetails{}
+
+	shutdown, exporter, err := oteltracing.TestInit()
+	defer shutdown()
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, "message details")
+	req.TraceAttributes(ctx)
+	span.End()
+
+	snapshots := exporter.GetSpans().Snapshots()
+	require.Len(t, snapshots, 1)
+	testspan := snapshots[0]
+	require.Len(t, testspan.Attributes(), 0)
+
+	ctx = context.Background()
+	ctx, span = otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, "named message details")
+	req.NamedAttributes(ctx, "prefix")
+	span.End()
+
+	snapshots = exporter.GetSpans().Snapshots()
+	require.Len(t, snapshots, 2)
+	testspan = snapshots[1]
+	require.Len(t, testspan.Attributes(), 0)
+}
+
 func (s *IntegrationSuite) Test_IntegrationOpenCensus() {
 	t := s.T()
 	req := echoRequest()

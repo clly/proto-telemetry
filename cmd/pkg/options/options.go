@@ -1,9 +1,10 @@
 package options
 
 import (
-	optionsv1 "github.com/clly/proto-telemetry/proto/telemetry/options/v1"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"google.golang.org/protobuf/proto"
+
+	optionsv1 "github.com/clly/proto-telemetry/proto/telemetry/options/v1"
 )
 
 // TelemetryPackage returns the (gopherjs.gopherjs_package) option if
@@ -44,6 +45,20 @@ func GetTelemetryFieldName(field *descriptor.FieldDescriptorProto, defaultValue 
 	e := proto.GetExtension(field.Options, optionsv1.E_FieldName)
 
 	if s, ok := e.(string); ok {
+		return s
+	}
+
+	return defaultValue
+}
+
+func GetTelemetryMessageExclude(message *descriptor.DescriptorProto, defaultValue bool) bool {
+	if message == nil || message.Options == nil {
+		return defaultValue
+	}
+
+	e := proto.GetExtension(message.Options, optionsv1.E_ExcludeMessage)
+
+	if s, ok := e.(bool); ok {
 		return s
 	}
 
