@@ -4,6 +4,9 @@ import (
 	"sort"
 
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protodesc"
+
+	"github.com/clly/proto-telemetry/cmd/pkg/options"
 )
 
 type Message struct {
@@ -45,12 +48,17 @@ func (m Message) Proto() *protogen.Message {
 }
 
 func (m Message) Generate(f *FileGenerator, named bool) {
+	exclude := options.GetTelemetryMessageExclude(protodesc.ToDescriptorProto(m.m.Desc), false)
+
 	g := f.g
 	var signature = "TraceAttributes(ctx context.Context) {"
 	if named {
 		signature = "NamedAttributes(ctx context.Context, pfx string) {"
 	}
 	g.P("func (x *", m.m.GoIdent, ")", signature)
+	if exclude {
+		return
+	}
 	g.P(f.Telemetry.Span())
 	g.P(f.Telemetry.Attribute(), "(")
 
