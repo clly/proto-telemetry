@@ -48,15 +48,37 @@ func attributeFromKind(t TelemetryBackend, k protoreflect.Kind) (string, string)
 	}
 }
 
+type attrName struct {
+	parent    string
+	fieldName string
+	separator string
+}
+
+func (a attrName) String() string {
+	b := strings.Builder{}
+	b.WriteString(a.parent)
+	b.WriteString(a.separator)
+	b.WriteString(a.fieldName)
+	// replace _ with .
+	str := strings.ToLower(b.String())
+	str = strings.ReplaceAll(str, "_", ".")
+	// replace . with whatever the user wants the separator to be
+	return strings.ReplaceAll(str, ".", a.separator)
+}
+
 func newField(field *protogen.Field, t TelemetryBackend) FieldAttribute {
-	attrName := strings.ReplaceAll(field.GoIdent.GoName, "_", ".")
-	attrName = strings.ToLower(attrName)
+	name := attrName{
+		parent:    field.Parent.GoIdent.GoName,
+		fieldName: field.GoName,
+		separator: ".",
+	}
 	attrKind, castCall := attributeFromKind(t, field.Desc.Kind())
 
-	attrName = options.GetTelemetryFieldName(protodesc.ToFieldDescriptorProto(field.Desc), attrName)
+	name.parent = options.GetTelemetryMessageName(protodesc.ToDescriptorProto(field.Parent.Desc), name.parent)
+	name.fieldName = options.GetTelemetryFieldName(protodesc.ToFieldDescriptorProto(field.Desc), name.fieldName)
 
 	fa := FieldAttribute{
-		attrName: attrName,
+		attrName: name.String(),
 		attrKind: attrKind,
 		castCall: castCall,
 		goName:   field.GoName,

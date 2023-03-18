@@ -17,6 +17,7 @@ extend google.protobuf.FieldOptions {
 
 extend google.protobuf.MessageOptions {
   bool exclude_message = 10010;
+  string message_name = 10011;
 }
 
 extend google.protobuf.FileOptions {

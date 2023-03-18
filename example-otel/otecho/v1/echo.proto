@@ -29,6 +29,7 @@ message MessageDetails {
 }
 
 message EchoResponse {
+  option (telemetry.options.v1.message_name) = "echo.resp";
   string msg = 1;
   google.type.DateTime now = 2;
 }
