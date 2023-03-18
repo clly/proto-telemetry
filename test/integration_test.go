@@ -97,7 +97,7 @@ func (s *IntegrationSuite) Test_IntegrationOpenTelemetryWithMap() {
 			}
 			// num32 is testing custom field_name
 			if name == "num32" {
-				m["number"] = val.Field(i).Interface()
+				m[pfx+".number"] = val.Field(i).Interface()
 				continue
 			}
 			m[pfx+"."+name] = val.Field(i).Interface()
@@ -169,7 +169,7 @@ func (s *IntegrationSuite) Test_IntegrationOpenCensus() {
 			}
 			// num32 is testing custom field_name
 			if name == "num32" {
-				m["number"] = val.Field(i).Interface()
+				m[pfx+".number"] = val.Field(i).Interface()
 				continue
 			}
 			m[pfx+"."+name] = val.Field(i).Interface()

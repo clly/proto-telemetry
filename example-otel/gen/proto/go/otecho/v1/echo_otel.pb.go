@@ -13,7 +13,7 @@ func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
 		attribute.String("echorequest.msg", x.Msg),
-		attribute.Int64("number", int64(x.Num32)),
+		attribute.Int64("echorequest.number", int64(x.Num32)),
 		attribute.Int64("echorequest.unum32", int64(x.Unum32)),
 		attribute.Int64("echorequest.num64", int64(x.Num64)),
 	)
@@ -28,7 +28,7 @@ func (x *EchoRequest) NamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
 		attribute.String(pfx+".echorequest.msg", x.Msg),
-		attribute.Int64(pfx+".number", int64(x.Num32)),
+		attribute.Int64(pfx+".echorequest.number", int64(x.Num32)),
 		attribute.Int64(pfx+".echorequest.unum32", int64(x.Unum32)),
 		attribute.Int64(pfx+".echorequest.num64", int64(x.Num64)),
 	)
