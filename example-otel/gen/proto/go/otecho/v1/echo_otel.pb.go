@@ -62,13 +62,13 @@ func (x *MessageDetails) NamedAttributes(ctx context.Context, pfx string) {
 func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
-		attribute.String("echoresponse.msg", x.Msg),
+		attribute.String("echo.resp.msg", x.Msg),
 	)
 }
 
 func (x *EchoResponse) NamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
-		attribute.String(pfx+".echoresponse.msg", x.Msg),
+		attribute.String(pfx+".echo.resp.msg", x.Msg),
 	)
 }

@@ -74,6 +74,7 @@ func newField(field *protogen.Field, t TelemetryBackend) FieldAttribute {
 	}
 	attrKind, castCall := attributeFromKind(t, field.Desc.Kind())
 
+	name.parent = options.GetTelemetryMessageName(protodesc.ToDescriptorProto(field.Parent.Desc), name.parent)
 	name.fieldName = options.GetTelemetryFieldName(protodesc.ToFieldDescriptorProto(field.Desc), name.fieldName)
 
 	fa := FieldAttribute{

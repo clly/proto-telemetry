@@ -51,6 +51,20 @@ func GetTelemetryFieldName(field *descriptor.FieldDescriptorProto, defaultValue 
 	return defaultValue
 }
 
+func GetTelemetryMessageName(message *descriptor.DescriptorProto, defaultValue string) string {
+	if message == nil || message.Options == nil {
+		return defaultValue
+	}
+
+	e := proto.GetExtension(message.Options, optionsv1.E_MessageName)
+
+	if s, ok := e.(string); ok {
+		return s
+	}
+
+	return defaultValue
+}
+
 func GetTelemetryMessageExclude(message *descriptor.DescriptorProto, defaultValue bool) bool {
 	if message == nil || message.Options == nil {
 		return defaultValue
