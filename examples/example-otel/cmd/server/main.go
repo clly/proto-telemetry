@@ -11,8 +11,8 @@ import (
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/grpc"
 
-	echov1 "github.com/clly/proto-telemetry/example-otel/gen/proto/go/otecho/v1"
-	"github.com/clly/proto-telemetry/example-otel/tracing"
+	"github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
+	"github.com/clly/proto-telemetry/examples/example-otel/tracing"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func run() error {
 	defer shutdown()
 
 	server := grpc.NewServer()
-	echov1.RegisterEchoServiceServer(server, &svr{})
+	otechov1.RegisterEchoServiceServer(server, &svr{})
 	log.Println("listening on", listener.Addr())
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("failed to server grpc server: %w", err)
@@ -45,14 +45,14 @@ func run() error {
 }
 
 type svr struct {
-	echov1.UnimplementedEchoServiceServer
+	otechov1.UnimplementedEchoServiceServer
 }
 
-func (s *svr) Echo(ctx context.Context, req *echov1.EchoRequest) (*echov1.EchoResponse, error) {
+func (s *svr) Echo(ctx context.Context, req *otechov1.EchoRequest) (*otechov1.EchoResponse, error) {
 	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, "Echo")
 	defer span.End()
 	req.TraceAttributes(ctx)
-	return &echov1.EchoResponse{
+	return &otechov1.EchoResponse{
 		Msg: req.Msg,
 		Now: dtFromTime(time.Now()),
 	}, nil

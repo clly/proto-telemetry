@@ -8,8 +8,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 
-	echov1 "github.com/clly/proto-telemetry/example-oc/gen/proto/go/ocecho/v1"
-	"github.com/clly/proto-telemetry/example-oc/tracing"
+	"github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/ocecho/v1"
+	"github.com/clly/proto-telemetry/examples/example-oc/tracing"
 )
 
 func main() {
@@ -28,17 +28,17 @@ func run() error {
 
 	tracing.Init()
 
-	echo := echov1.NewEchoServiceClient(conn)
+	echo := ocechov1.NewEchoServiceClient(conn)
 
 	ctx := context.Background()
 	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/client").Start(ctx, "Echo Client")
 	defer span.End()
 
-	req := &echov1.EchoRequest{
+	req := &ocechov1.EchoRequest{
 		Msg: "Hello World!",
 	}
 	req.TraceAttributes(ctx)
-	if _, err := echo.Echo(context.Background(), &echov1.EchoRequest{
+	if _, err := echo.Echo(context.Background(), &ocechov1.EchoRequest{
 		Msg: "Hello World!",
 	}); err != nil {
 		return fmt.Errorf("failed to Echo: %w", err)
