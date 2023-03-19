@@ -6,11 +6,11 @@ import (
 	"net"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/shoenig/test/must"
 	"github.com/shoenig/test/portal"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
@@ -33,8 +33,8 @@ func Test_UnaryInterceptor(t *testing.T) {
 
 	s := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			// UnaryInterceptor(),
 			otelgrpc.UnaryServerInterceptor(),
+			UnaryInterceptor(),
 		),
 	)
 	pingsvr := pingv1.UnimplementedPingServiceServer{}
@@ -51,9 +51,15 @@ func Test_UnaryInterceptor(t *testing.T) {
 	must.Error(t, err)
 
 	spans := exporter.GetSpans()
+	for _, kv := range spans.Snapshots()[0].Attributes() {
+		if kv.Key == "pingrequest.name" {
+			must.Eq(t, attribute.STRING, kv.Value.Type())
+			must.Eq(t, "me", kv.Value.AsString())
+		}
+	}
 	closer()
 	l.Close()
-	spew.Dump(spans)
+	// spew.Dump(spans)
 
 }
 
