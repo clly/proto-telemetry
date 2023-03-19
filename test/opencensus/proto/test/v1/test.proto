@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package otecho.v1;
+package opencensus.test.v1;
 
 import "telemetry/options/v1/options.proto";
 import "google/type/datetime.proto";
 
-option go_package = "github.com/clly/protoc-telemetry-go/test/proto/gen/test/v1;testv1";
+option go_package = "github.com/clly/protoc-telemetry-go/test/opencensus/proto/gen/test/v1;testv1";
 
 message StringMessage {
   string msg = 1;
