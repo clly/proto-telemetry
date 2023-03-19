@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package ping.v1;
+
+option go_package = "github.com/clly/protoc-telemetry-go/test/proto/gen/ping/v1;pingv1";
+
+service PingService {
+  rpc Ping(PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {
+  string name = 1;
+}
+
+message PingResponse {
+  string response = 2;
+}

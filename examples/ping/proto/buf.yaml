@@ -1,0 +1,10 @@
+version: v1
+name: buf.build/clly/ping
+deps:
+  - buf.build/clly/telemetry
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
