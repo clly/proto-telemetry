@@ -13,10 +13,10 @@ import (
 	"go.opencensus.io/trace"
 	"go.opentelemetry.io/otel"
 
-	ocechov1 "github.com/clly/proto-telemetry/example-oc/gen/proto/go/ocecho/v1"
-	octracing "github.com/clly/proto-telemetry/example-oc/tracing"
-	otelechov1 "github.com/clly/proto-telemetry/example-otel/gen/proto/go/otecho/v1"
-	oteltracing "github.com/clly/proto-telemetry/example-otel/tracing"
+	"github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/ocecho/v1"
+	octracing "github.com/clly/proto-telemetry/examples/example-oc/tracing"
+	otelechov1 "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
+	oteltracing "github.com/clly/proto-telemetry/examples/example-otel/tracing"
 )
 
 type IntegrationSuite struct {
