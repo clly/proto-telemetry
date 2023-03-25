@@ -13,6 +13,12 @@ type InMemoryExporter struct {
 	m        sync.Mutex
 }
 
+func (i *InMemoryExporter) shutdown() {
+	i.m.Lock()
+	defer i.m.Unlock()
+	i.SpanData = make([]*trace.SpanData, 0)
+}
+
 // Compile time assertion that the exporter implements trace.Exporter
 var _ trace.Exporter = (*consoleExporter)(nil)
 var _ trace.Exporter = (*InMemoryExporter)(nil)
@@ -34,7 +40,7 @@ func Init() {
 	trace.RegisterExporter(new(consoleExporter))
 }
 
-func TestInit() *InMemoryExporter {
+func TestInit() (*InMemoryExporter, func()) {
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 
 	exporter := &InMemoryExporter{
@@ -43,5 +49,5 @@ func TestInit() *InMemoryExporter {
 	}
 
 	trace.RegisterExporter(exporter)
-	return exporter
+	return exporter, exporter.shutdown
 }
