@@ -126,14 +126,14 @@ func (x *MessageDetails) NamedAttributes(ctx context.Context, pfx string) {
 func (x *ExcludeField) TraceAttributes(ctx context.Context) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
-		attribute.String("excludefield.nonmasked", x.NonMasked),
+		attribute.String("excludefield.non_masked", x.NonMasked),
 	)
 }
 
 func (x *ExcludeField) NamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(
-		attribute.String(pfx+".excludefield.nonmasked", x.NonMasked),
+		attribute.String(pfx+".excludefield.non_masked", x.NonMasked),
 	)
 }
 
