@@ -137,6 +137,17 @@ func ocEchoRequest() *ocechov1.EchoRequest {
 	}
 }
 
+func (s *IntegrationSuite) Test_ExcludedFile() {
+	msg := &ottestv1.TestMessage{
+		TestField: uuid.New().String(),
+	}
+
+	_, taOK := any(msg).(TraceAttributer)
+	_, naOK := any(msg).(NamedAttributer)
+	require.False(s.T(), taOK, "message should not implement TraceAttributer")
+	require.False(s.T(), naOK, "message should not implement NamedAttributer")
+}
+
 func (s *IntegrationSuite) Test_OpenTelemetry() {
 
 	testcases := map[string]struct {
