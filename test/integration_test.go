@@ -195,6 +195,16 @@ func (s *IntegrationSuite) Test_OpenTelemetry() {
 				},
 			},
 		},
+		"RenameMessage": {
+			msg: &ottestv1.RenameMessagePrefix{
+				Msg: uuid.New().String(),
+			},
+		},
+		"NameField": {
+			msg: &ottestv1.NameField{
+				Msg: uuid.New().String(),
+			},
+		},
 	}
 
 	for name, tc := range testcases {
