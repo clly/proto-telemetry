@@ -2,12 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protodesc"
 
 	"github.com/clly/proto-telemetry/cmd/pkg/generators"
 	fields "github.com/clly/proto-telemetry/cmd/pkg/generators"
 	"github.com/clly/proto-telemetry/cmd/pkg/logger"
+	"github.com/clly/proto-telemetry/cmd/pkg/options"
 )
 
 type config struct {
@@ -36,6 +40,11 @@ func main() {
 				telemetryBackend: *telemetryBackend,
 			}
 
+			excludeFile := options.GetTelemetryExcludeFile(protodesc.ToFileDescriptorProto(f.Desc))
+			if excludeFile {
+				fmt.Fprintln(os.Stderr, "skipping file", f.Desc.Path())
+				continue
+			}
 			generateFile(p, f, cfg)
 		}
 		return nil
@@ -50,8 +59,6 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 	g.P()
 	g.P("package ", f.GoPackageName)
 	g.P()
-
-	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
 
 	setLogger(cfg.logLevel)
 

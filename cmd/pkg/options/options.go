@@ -9,18 +9,17 @@ import (
 
 // TelemetryPackage returns the (gopherjs.gopherjs_package) option if
 // specified, or an empty string if it was not.
-func GetTelemetryPackage(file *descriptor.FileDescriptorProto) string {
+func GetTelemetryExcludeFile(file *descriptor.FileDescriptorProto) bool {
 	if file == nil || file.Options == nil {
-		return ""
+		return false
 	}
 
-	e := proto.GetExtension(file.Options, optionsv1.E_TelemetryPackage)
-
-	if s, ok := e.(*string); ok {
-		return *s
+	e := proto.GetExtension(file.Options, optionsv1.E_ExcludeFile)
+	if s, ok := e.(bool); ok {
+		return s
 	}
 
-	return ""
+	return false
 }
 
 func GetTelemetryFieldExclude(field *descriptor.FieldDescriptorProto, defaultValue bool) bool {
