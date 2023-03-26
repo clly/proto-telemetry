@@ -20,8 +20,10 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
+	"github.com/clly/proto-telemetry/cmd/pkg/options"
 	"github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/ocecho/v1"
 	octracing "github.com/clly/proto-telemetry/examples/example-oc/tracing"
 	otelechov1 "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
@@ -234,27 +236,12 @@ func verify(t *testing.T, msg TestTraceAttributer, testspan sdktrace.ReadOnlySpa
 	fields := make(map[string]value)
 
 	msg.ProtoReflect().Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-		e := proto.GetExtension(fd.Options(), optionsv1.E_Exclude)
-
+		name := options.GetTelemetryFieldName(protodesc.ToFieldDescriptorProto(fd), string(fd.Name()))
 		val := value{
-			excluded:  false,
-			fieldName: string(fd.Name()),
-			value:     v.Interface(),
-			typ:       fd.Kind(),
-			isMap:     fd.IsMap(),
-		}
-		if s, ok := e.(bool); ok {
-			val.excluded = s
-		} else {
-			val.excluded = false
-		}
-
-		name := val.fieldName
-
-		if s, ok := e.(bool); ok {
-			val.excluded = s
-		} else {
-			val.excluded = false
+			excluded: options.GetTelemetryFieldExclude(protodesc.ToFieldDescriptorProto(fd), false),
+			value:    v.Interface(),
+			typ:      fd.Kind(),
+			isMap:    fd.IsMap(),
 		}
 
 		if val.isMap {
@@ -299,6 +286,7 @@ func verify(t *testing.T, msg TestTraceAttributer, testspan sdktrace.ReadOnlySpa
 
 	val := reflect.ValueOf(msg).Elem()
 	pfx := strings.ToLower(val.Type().Name())
+	pfx = options.GetTelemetryMessageName(protodesc.ToDescriptorProto(msg.ProtoReflect().Descriptor()), pfx)
 
 	expectedAttributes := make(map[string]any)
 	for name, val := range fields {
