@@ -27,7 +27,9 @@ func NewMapGenerator(m *protogen.Field) generator {
 }
 
 func (m *MapGenerator) Generate(f *FileGenerator, named bool) {
+
 	g := f.g
+	_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
 	var key = fmt.Sprintf("%s.%s", strings.ToLower(m.m.Parent.GoIdent.GoName), strings.ToLower(m.m.GoName))
 	if named {
 		key = fmt.Sprintf("pfx.%s", key)
