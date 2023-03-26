@@ -2,17 +2,16 @@
 
 set -eof pipefail
 
-go install ./cmd/protoc-gen-go-telemetry/
-
 (
     echo "Generating opentelemetry"
-    cd examples/example-otel
+    cd open-telemetry/proto
     buf generate
 )
 
 echo 
 (
     echo "Generating opencensus"
-    cd examples/example-oc
+    cd opencensus/proto
     buf generate
 )
+

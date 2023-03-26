@@ -1,5 +1,5 @@
-example-otel/client
-example-otel/server
+examples/example-otel/client
+examples/example-otel/server
 
-example-oc/client
-example-oc/server
+examples/example-oc/client
+examples/example-oc/server

@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package opentelemetry.test.v1;
+
+import "telemetry/options/v1/options.proto";
+import "google/type/datetime.proto";
+
+option go_package = "github.com/clly/protoc-telemetry-go/test/open-telemetry/proto/gen/test/v1;testv1";
+
+message StringMessage {
+  string msg = 1;
+}
+
+message Int32Message {
+  int32 num32 = 1;
+}
+
+message Uint32Message {
+  uint32 unum32 = 1;
+}
+
+message Int64Message {
+  int64 num64 = 1;
+}
+
+message SubMessage {
+  MessageDetails details = 1;
+  message Envelope {
+    string name = 1;
+    message Letter {
+      string contents = 1;
+    }
+  }
+  Envelope envelope = 2;
+}
+
+message MapMessage {
+  map<string, string> meta = 1;
+}
+
+message MessageDetails {
+  string details = 1;
+}
+
+message ExcludeField {
+  string name = 1 [(telemetry.options.v1.exclude) = true];
+  string non_masked = 2;
+}
+
+message ExcludeMessage {
+  option (telemetry.options.v1.exclude_message) = true;
+  string msg = 1;
+  google.type.DateTime now = 2;
+}
+
+message RenameMessagePrefix {
+  option (telemetry.options.v1.message_name) = "pfx";
+  string msg = 1;
+}
+
+message NameField {
+  string msg = 1 [(telemetry.options.v1.field_name) = "message"];
+}

@@ -56,12 +56,12 @@ type attrName struct {
 
 func (a attrName) String() string {
 	b := strings.Builder{}
-	b.WriteString(a.parent)
+	parent := strings.ReplaceAll(a.parent, "_", ".")
+	b.WriteString(parent)
 	b.WriteString(a.separator)
 	b.WriteString(a.fieldName)
 	// replace _ with .
 	str := strings.ToLower(b.String())
-	str = strings.ReplaceAll(str, "_", ".")
 	// replace . with whatever the user wants the separator to be
 	return strings.ReplaceAll(str, ".", a.separator)
 }
@@ -69,7 +69,7 @@ func (a attrName) String() string {
 func newField(field *protogen.Field, t TelemetryBackend) FieldAttribute {
 	name := attrName{
 		parent:    field.Parent.GoIdent.GoName,
-		fieldName: field.GoName,
+		fieldName: string(field.Desc.Name()),
 		separator: ".",
 	}
 	attrKind, castCall := attributeFromKind(t, field.Desc.Kind())
