@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package opentelemetry.test.v1;
+
+import "telemetry/options/v1/options.proto";
+
+option go_package = "github.com/clly/protoc-telemetry-go/test/open-telemetry/proto/gen/test/v1;testv1";
+
+option (telemetry.options.v1.exclude_file) = true;
+
+// This is a test message.
+message TestMessage {
+  // This is a test field.
+  string test_field = 1;
+}
