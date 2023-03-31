@@ -13,3 +13,10 @@ tests:
 .PHONY: bench
 bench:
 	go test $(BENCHFLAGS) ./test/...
+
+.PHONY: generate
+generate:
+	@ ( \
+		cd test ; \
+		./generate.bash ; \
+	);

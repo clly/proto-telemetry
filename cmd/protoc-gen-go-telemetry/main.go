@@ -29,6 +29,11 @@ func main() {
 		ParamFunc: flags.Set,
 	}
 
+	if len(os.Args) > 1 && (os.Args[1] == "--help" || os.Args[1] == "-h") {
+		flags.PrintDefaults()
+		os.Exit(0)
+	}
+
 	opts.Run(func(p *protogen.Plugin) error {
 		for _, f := range p.Files {
 			if !f.Generate {
