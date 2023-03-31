@@ -27,7 +27,7 @@ func (x *EchoRequest) TraceAttributes(ctx context.Context) {
 	}
 }
 
-func (x *EchoRequest) NamedAttributes(ctx context.Context, pfx string) {
+func (x *EchoRequest) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.FromContext(ctx)
 	if !span.IsRecordingEvents() {
 		return
@@ -57,7 +57,7 @@ func (x *EchoRequest_Envelope) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *EchoRequest_Envelope) NamedAttributes(ctx context.Context, pfx string) {
+func (x *EchoRequest_Envelope) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.FromContext(ctx)
 	if !span.IsRecordingEvents() {
 		return
@@ -79,7 +79,7 @@ func (x *MessageDetails) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *MessageDetails) NamedAttributes(ctx context.Context, pfx string) {
+func (x *MessageDetails) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.FromContext(ctx)
 	if !span.IsRecordingEvents() {
 		return
@@ -101,7 +101,7 @@ func (x *EchoResponse) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *EchoResponse) NamedAttributes(ctx context.Context, pfx string) {
+func (x *EchoResponse) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.FromContext(ctx)
 	if !span.IsRecordingEvents() {
 		return

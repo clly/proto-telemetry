@@ -53,7 +53,7 @@ func (m Message) Generate(f *FileGenerator, named bool) {
 	g := f.g
 	var signature = "TraceAttributes(ctx context.Context) {"
 	if named {
-		signature = "NamedAttributes(ctx context.Context, pfx string) {"
+		signature = "TraceNamedAttributes(ctx context.Context, pfx string) {"
 	}
 	g.P("func (x *", m.m.GoIdent, ")", signature)
 	if exclude {

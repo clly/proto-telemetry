@@ -20,7 +20,7 @@ func (x *StringMessage) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *StringMessage) NamedAttributes(ctx context.Context, pfx string) {
+func (x *StringMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -42,7 +42,7 @@ func (x *Int32Message) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *Int32Message) NamedAttributes(ctx context.Context, pfx string) {
+func (x *Int32Message) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -64,7 +64,7 @@ func (x *Uint32Message) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *Uint32Message) NamedAttributes(ctx context.Context, pfx string) {
+func (x *Uint32Message) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -86,7 +86,7 @@ func (x *Int64Message) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *Int64Message) NamedAttributes(ctx context.Context, pfx string) {
+func (x *Int64Message) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -106,7 +106,7 @@ func (x *SubMessage) TraceAttributes(ctx context.Context) {
 	span.SetAttributes()
 }
 
-func (x *SubMessage) NamedAttributes(ctx context.Context, pfx string) {
+func (x *SubMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -126,7 +126,7 @@ func (x *SubMessage_Envelope) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *SubMessage_Envelope) NamedAttributes(ctx context.Context, pfx string) {
+func (x *SubMessage_Envelope) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -151,7 +151,7 @@ func (x *MapMessage) TraceAttributes(ctx context.Context) {
 	}
 }
 
-func (x *MapMessage) NamedAttributes(ctx context.Context, pfx string) {
+func (x *MapMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -176,7 +176,7 @@ func (x *MessageDetails) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *MessageDetails) NamedAttributes(ctx context.Context, pfx string) {
+func (x *MessageDetails) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -198,7 +198,7 @@ func (x *ExcludeField) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *ExcludeField) NamedAttributes(ctx context.Context, pfx string) {
+func (x *ExcludeField) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -212,7 +212,7 @@ func (x *ExcludeField) NamedAttributes(ctx context.Context, pfx string) {
 func (x *ExcludeMessage) TraceAttributes(ctx context.Context) {
 }
 
-func (x *ExcludeMessage) NamedAttributes(ctx context.Context, pfx string) {
+func (x *ExcludeMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
 }
 
 func (x *RenameMessagePrefix) TraceAttributes(ctx context.Context) {
@@ -226,7 +226,7 @@ func (x *RenameMessagePrefix) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *RenameMessagePrefix) NamedAttributes(ctx context.Context, pfx string) {
+func (x *RenameMessagePrefix) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return
@@ -248,7 +248,7 @@ func (x *NameField) TraceAttributes(ctx context.Context) {
 	)
 }
 
-func (x *NameField) NamedAttributes(ctx context.Context, pfx string) {
+func (x *NameField) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return

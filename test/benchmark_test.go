@@ -21,7 +21,7 @@ func BenchmarkNamedAttributes(b *testing.B) {
 	var msg = generateMessage()
 	ctx := context.Background()
 	for i := 0; i < b.N; i++ {
-		msg.NamedAttributes(ctx, "resource")
+		msg.TraceNamedAttributes(ctx, "resource")
 	}
 }
 
