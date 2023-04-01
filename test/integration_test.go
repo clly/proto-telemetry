@@ -60,14 +60,14 @@ type TraceAttributer interface {
 	TraceAttributes(ctx context.Context)
 }
 
-type NamedAttributer interface {
-	NamedAttributes(ctx context.Context, pfx string)
+type TraceNamedAttributer interface {
+	TraceNamedAttributes(ctx context.Context, pfx string)
 }
 
 type TestTraceAttributer interface {
 	ProtoReflect() protoreflect.Message
 	TraceAttributer
-	NamedAttributer
+	TraceNamedAttributer
 }
 
 func otTrace(t *testing.T, ta TraceAttributer) {
@@ -77,10 +77,10 @@ func otTrace(t *testing.T, ta TraceAttributer) {
 	span.End()
 }
 
-func otNamedTrace(t *testing.T, na NamedAttributer, pfx string) {
+func otNamedTrace(t *testing.T, na TraceNamedAttributer, pfx string) {
 	ctx := context.Background()
 	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, t.Name())
-	na.NamedAttributes(ctx, pfx)
+	na.TraceNamedAttributes(ctx, pfx)
 	span.End()
 }
 
@@ -125,9 +125,9 @@ func (s *IntegrationSuite) Test_ExcludedFile() {
 	}
 
 	_, taOK := any(msg).(TraceAttributer)
-	_, naOK := any(msg).(NamedAttributer)
+	_, naOK := any(msg).(TraceNamedAttributer)
 	require.False(s.T(), taOK, "message should not implement TraceAttributer")
-	require.False(s.T(), naOK, "message should not implement NamedAttributer")
+	require.False(s.T(), naOK, "message should not implement TraceNamedAttributer")
 }
 
 func (s *IntegrationSuite) Test_OpenTelemetry() {

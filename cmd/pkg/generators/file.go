@@ -2,6 +2,7 @@ package generators
 
 import (
 	"fmt"
+	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -55,7 +56,12 @@ func (o *OpentelemetryGenerator) Imports(g *protogen.GeneratedFile) {
 }
 
 func (o *OpentelemetryGenerator) Span() string {
-	return fmt.Sprintf("span := %s.SpanFromContext(ctx)", o.traceIdent)
+	sb := strings.Builder{}
+	sb.WriteString(fmt.Sprintf("span := %s.SpanFromContext(ctx)\n", o.traceIdent))
+	sb.WriteString("if !span.IsRecording() {\n")
+	sb.WriteString("return\n")
+	sb.WriteString("}\n")
+	return sb.String()
 }
 
 func (o *OpentelemetryGenerator) Attribute() string {
@@ -97,7 +103,12 @@ func (o *OpencensusGenerator) Imports(g *protogen.GeneratedFile) {
 }
 
 func (o *OpencensusGenerator) Span() string {
-	return "span := trace.FromContext(ctx)"
+	sb := strings.Builder{}
+	sb.WriteString("span := trace.FromContext(ctx)\n")
+	sb.WriteString("if !span.IsRecordingEvents() {\n")
+	sb.WriteString("return\n")
+	sb.WriteString("}\n")
+	return sb.String()
 }
 
 func (o *OpencensusGenerator) AttributeType(k protoreflect.Kind) string {
