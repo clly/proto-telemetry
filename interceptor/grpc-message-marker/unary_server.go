@@ -6,7 +6,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-type interceptorOpt struct{}
+type interceptorOpt struct {
+	withRequestAttributes bool
+}
 
 type InterceptorOpt func(opt interceptorOpt)
 
@@ -35,6 +37,16 @@ func UnaryInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
 		}
 
 		resp, err = handler(ctx, req)
+		if err != nil {
+			return resp, err
+		}
+
+		if attributer, ok := resp.(interface {
+			TraceAttributes(context.Context)
+		}); ok {
+			attributer.TraceAttributes(ctx)
+		}
+
 		return resp, err
 	}
 }

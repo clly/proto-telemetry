@@ -21,45 +21,55 @@ import (
 )
 
 func Test_UnaryInterceptor(t *testing.T) {
-	grabber := portal.New(t)
-	port := grabber.One()
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	must.NoError(t, err)
-
-	ctx := context.Background()
-
-	closer, exporter, err := tracer()
-	must.NoError(t, err)
-
-	s := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			otelgrpc.UnaryServerInterceptor(),
-			UnaryInterceptor(),
-		),
-	)
-	pingsvr := pingv1.UnimplementedPingServiceServer{}
-	pingv1.RegisterPingServiceServer(s, pingsvr)
-	go func() {
-		s.Serve(l)
-	}()
-
-	conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	must.NoError(t, err)
-
-	client := pingv1.NewPingServiceClient(conn)
-	_, err = client.Ping(ctx, &pingv1.PingRequest{Name: "me"})
-	must.Error(t, err)
-
-	spans := exporter.GetSpans()
-	for _, kv := range spans.Snapshots()[0].Attributes() {
-		if kv.Key == "pingrequest.name" {
-			must.Eq(t, attribute.STRING, kv.Value.Type())
-			must.Eq(t, "me", kv.Value.AsString())
-		}
+	testcases := map[string]struct{}{
+		"Normal": {},
 	}
-	closer()
-	l.Close()
-	// spew.Dump(spans)
+
+	for name, tc := range testcases {
+		t.Run(name, func(t *testing.T) {
+			tc := tc
+			_ = tc
+			t.Parallel()
+			grabber := portal.New(t)
+			port := grabber.One()
+			l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+			must.NoError(t, err)
+
+			ctx := context.Background()
+
+			closer, exporter, err := tracer()
+			must.NoError(t, err)
+
+			s := grpc.NewServer(
+				grpc.ChainUnaryInterceptor(
+					otelgrpc.UnaryServerInterceptor(),
+					UnaryInterceptor(),
+				),
+			)
+			pingsvr := pingv1.UnimplementedPingServiceServer{}
+			pingv1.RegisterPingServiceServer(s, pingsvr)
+			go func() {
+				s.Serve(l)
+			}()
+
+			conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+			must.NoError(t, err)
+
+			client := pingv1.NewPingServiceClient(conn)
+			_, err = client.Ping(ctx, &pingv1.PingRequest{Name: "me"})
+			must.Error(t, err)
+
+			spans := exporter.GetSpans()
+			for _, kv := range spans.Snapshots()[0].Attributes() {
+				if kv.Key == "pingrequest.name" {
+					must.Eq(t, attribute.STRING, kv.Value.Type())
+					must.Eq(t, "me", kv.Value.AsString())
+				}
+			}
+			closer()
+			l.Close()
+		})
+	}
 
 }
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ping.v1;
 
-option go_package = "github.com/clly/protoc-telemetry-go/test/proto/gen/ping/v1;pingv1";
+option go_package = "github.com/clly/proto-telemetry/test/proto/gen/ping/v1;pingv1";
 
 service PingService {
   rpc Ping(PingRequest) returns (PingResponse) {}
