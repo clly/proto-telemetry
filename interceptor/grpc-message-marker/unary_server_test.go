@@ -22,14 +22,18 @@ import (
 )
 
 func Test_UnaryInterceptor(t *testing.T) {
-	testcases := map[string]struct{}{
+	testcases := map[string]struct {
+		withoutRequest bool
+	}{
 		"Normal": {},
+		"WithoutRequest": {
+			withoutRequest: true,
+		},
 	}
 
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
 			tc := tc
-			_ = tc
 			t.Parallel()
 			grabber := portal.New(t)
 			port := grabber.One()
@@ -41,10 +45,15 @@ func Test_UnaryInterceptor(t *testing.T) {
 			closer, exporter, err := tracer()
 			must.NoError(t, err)
 
+			opts := []InterceptorOpt{}
+			if tc.withoutRequest {
+				opts = append(opts, WithoutRequest())
+			}
+
 			s := grpc.NewServer(
 				grpc.ChainUnaryInterceptor(
 					otelgrpc.UnaryServerInterceptor(),
-					UnaryInterceptor(),
+					UnaryInterceptor(opts...),
 				),
 			)
 			pingsvr := &ping.PingServer{}
@@ -62,7 +71,7 @@ func Test_UnaryInterceptor(t *testing.T) {
 
 			spans := exporter.GetSpans()
 			for _, kv := range spans.Snapshots()[0].Attributes() {
-				if kv.Key == "pingrequest.name" {
+				if kv.Key == "pingrequest.name" && !tc.withoutRequest {
 					must.Eq(t, attribute.STRING, kv.Value.Type())
 					must.Eq(t, "me", kv.Value.AsString())
 				}

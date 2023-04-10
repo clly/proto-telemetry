@@ -7,10 +7,16 @@ import (
 )
 
 type interceptorOpt struct {
-	withRequestAttributes bool
+	withoutRequestAttributes bool
 }
 
 type InterceptorOpt func(opt interceptorOpt)
+
+func WithoutRequest() InterceptorOpt {
+	return func(opt interceptorOpt) {
+		opt.withoutRequestAttributes = true
+	}
+}
 
 type attributer interface {
 	TraceAttributes(ctx context.Context)
@@ -30,10 +36,12 @@ func UnaryInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
 		opt(iOpts)
 	}
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		if attributer, ok := req.(interface {
-			TraceAttributes(context.Context)
-		}); ok {
-			attributer.TraceAttributes(ctx)
+		if !iOpts.withoutRequestAttributes {
+			if attributer, ok := req.(interface {
+				TraceAttributes(context.Context)
+			}); ok {
+				attributer.TraceAttributes(ctx)
+			}
 		}
 
 		resp, err = handler(ctx, req)
