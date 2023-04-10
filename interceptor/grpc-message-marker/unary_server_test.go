@@ -23,11 +23,15 @@ import (
 
 func Test_UnaryInterceptor(t *testing.T) {
 	testcases := map[string]struct {
-		withoutRequest bool
+		withoutRequest  bool
+		withoutResponse bool
 	}{
 		"Normal": {},
 		"WithoutRequest": {
 			withoutRequest: true,
+		},
+		"WithoutResponse": {
+			withoutResponse: true,
 		},
 	}
 
@@ -48,6 +52,9 @@ func Test_UnaryInterceptor(t *testing.T) {
 			opts := []InterceptorOpt{}
 			if tc.withoutRequest {
 				opts = append(opts, WithoutRequest())
+			}
+			if tc.withoutResponse {
+				opts = append(opts, WithoutResponse())
 			}
 
 			s := grpc.NewServer(
@@ -70,21 +77,28 @@ func Test_UnaryInterceptor(t *testing.T) {
 			must.NoError(t, err)
 
 			spans := exporter.GetSpans()
+			must.Eq(t, 1, len(spans.Snapshots()))
 			for _, kv := range spans.Snapshots()[0].Attributes() {
 				if kv.Key == "pingrequest.name" && !tc.withoutRequest {
 					must.Eq(t, attribute.STRING, kv.Value.Type())
 					must.Eq(t, "me", kv.Value.AsString())
 				}
-				if kv.Key == "pingresponse.name" {
+				if kv.Key == "pingrequest.name" && tc.withoutRequest {
+					t.Fatalf("expected not to contain %s", kv.Key)
+				}
+				if kv.Key == "pingresponse.name" && !tc.withoutResponse {
 					must.Eq(t, attribute.STRING, kv.Value.Type())
 					must.Eq(t, "me", kv.Value.AsString())
 				}
+				if kv.Key == "pingresponse.name" && tc.withoutResponse {
+					t.Fatalf("expected not to contain %s", kv.Key)
+				}
 			}
+
 			closer()
 			l.Close()
 		})
 	}
-
 }
 
 func tracer() (func(), *tracetest.InMemoryExporter, error) {
