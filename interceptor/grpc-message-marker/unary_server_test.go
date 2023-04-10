@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/clly/proto-telemetry/examples/ping"
 	pingv1 "github.com/clly/proto-telemetry/examples/ping/proto/gen/ping/v1"
 )
 
@@ -46,7 +47,7 @@ func Test_UnaryInterceptor(t *testing.T) {
 					UnaryInterceptor(),
 				),
 			)
-			pingsvr := pingv1.UnimplementedPingServiceServer{}
+			pingsvr := &ping.PingServer{}
 			pingv1.RegisterPingServiceServer(s, pingsvr)
 			go func() {
 				s.Serve(l)
@@ -57,11 +58,15 @@ func Test_UnaryInterceptor(t *testing.T) {
 
 			client := pingv1.NewPingServiceClient(conn)
 			_, err = client.Ping(ctx, &pingv1.PingRequest{Name: "me"})
-			must.Error(t, err)
+			must.NoError(t, err)
 
 			spans := exporter.GetSpans()
 			for _, kv := range spans.Snapshots()[0].Attributes() {
 				if kv.Key == "pingrequest.name" {
+					must.Eq(t, attribute.STRING, kv.Value.Type())
+					must.Eq(t, "me", kv.Value.AsString())
+				}
+				if kv.Key == "pingresponse.name" {
 					must.Eq(t, attribute.STRING, kv.Value.Type())
 					must.Eq(t, "me", kv.Value.AsString())
 				}
