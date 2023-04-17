@@ -43,14 +43,7 @@ func UnaryInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
 		opt(iOpts)
 	}
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		if !iOpts.withoutRequestAttributes {
-			if attributer, ok := req.(interface {
-				TraceAttributes(context.Context)
-			}); ok {
-				attributer.TraceAttributes(ctx)
-			}
-		}
-
+		traceReq(ctx, iOpts, req)
 		resp, err = handler(ctx, req)
 		if err != nil {
 			return resp, err
@@ -66,4 +59,16 @@ func UnaryInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
 
 		return resp, err
 	}
+}
+
+func traceReq(ctx context.Context, iopts *interceptorOpt, req interface{}) {
+	if iopts.withoutRequestAttributes {
+		return
+	}
+	if attributer, ok := req.(interface {
+		TraceAttributes(context.Context)
+	}); ok {
+		attributer.TraceAttributes(ctx)
+	}
+
 }
