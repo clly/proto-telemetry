@@ -49,13 +49,7 @@ func UnaryInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
 			return resp, err
 		}
 
-		if !iOpts.withoutResponseAttributes {
-			if attributer, ok := resp.(interface {
-				TraceAttributes(context.Context)
-			}); ok {
-				attributer.TraceAttributes(ctx)
-			}
-		}
+		traceResp(ctx, iOpts, resp)
 
 		return resp, err
 	}
@@ -65,10 +59,16 @@ func traceReq(ctx context.Context, iopts *interceptorOpt, req interface{}) {
 	if iopts.withoutRequestAttributes {
 		return
 	}
-	if attributer, ok := req.(interface {
-		TraceAttributes(context.Context)
-	}); ok {
+	if attributer, ok := req.(attributer); ok {
 		attributer.TraceAttributes(ctx)
 	}
+}
 
+func traceResp(ctx context.Context, iopts *interceptorOpt, resp interface{}) {
+	if iopts.withoutResponseAttributes {
+		return
+	}
+	if attributer, ok := resp.(attributer); ok {
+		attributer.TraceAttributes(ctx)
+	}
 }
