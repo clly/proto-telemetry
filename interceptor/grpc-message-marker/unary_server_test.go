@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/shoenig/test/must"
@@ -25,6 +26,8 @@ func Test_UnaryInterceptor(t *testing.T) {
 	testcases := map[string]struct {
 		withoutRequest  bool
 		withoutResponse bool
+		withoutReqName  bool
+		name            string
 	}{
 		"Normal": {},
 		"WithoutRequest": {
@@ -78,27 +81,66 @@ func Test_UnaryInterceptor(t *testing.T) {
 
 			spans := exporter.GetSpans()
 			must.Eq(t, 1, len(spans.Snapshots()))
-			for _, kv := range spans.Snapshots()[0].Attributes() {
-				if kv.Key == "pingrequest.name" && !tc.withoutRequest {
-					must.Eq(t, attribute.STRING, kv.Value.Type())
-					must.Eq(t, "me", kv.Value.AsString())
-				}
-				if kv.Key == "pingrequest.name" && tc.withoutRequest {
-					t.Fatalf("expected not to contain %s", kv.Key)
-				}
-				if kv.Key == "pingresponse.name" && !tc.withoutResponse {
-					must.Eq(t, attribute.STRING, kv.Value.Type())
-					must.Eq(t, "me", kv.Value.AsString())
-				}
-				if kv.Key == "pingresponse.name" && tc.withoutResponse {
-					t.Fatalf("expected not to contain %s", kv.Key)
-				}
+			reqAttr := &attribute.KeyValue{
+				Key:   "req.pingrequest.name",
+				Value: attribute.StringValue("me"),
+			}
+			respAttr := &attribute.KeyValue{
+				Key:   "pingresponse.response",
+				Value: attribute.StringValue("me"),
+			}
+			if tc.withoutRequest {
+				must.NotContains[*attribute.KeyValue](t, reqAttr, containsAttr(spans.Snapshots()[0].Attributes()),
+					must.Sprintf("expected no element %v=%v, all elements: %s", reqAttr.Key, reqAttr.Value.AsString(),
+						allKVs(spans.Snapshots()[0].Attributes())),
+				)
+			} else {
+				must.Contains[*attribute.KeyValue](t, reqAttr, containsAttr(spans.Snapshots()[0].Attributes()),
+					must.Sprintf("expected element %v=%v, all elements: %s", reqAttr.Key, reqAttr.Value.AsString(),
+						allKVs(spans.Snapshots()[0].Attributes())),
+				)
+			}
+			if tc.withoutResponse {
+				must.NotContains[*attribute.KeyValue](t, respAttr, containsAttr(spans.Snapshots()[0].Attributes()),
+					must.Sprintf("expected no element %v=%v, all elements: %s", respAttr.Key, respAttr.Value.AsString(),
+						allKVs(spans.Snapshots()[0].Attributes())),
+				)
+			} else {
+				must.Contains[*attribute.KeyValue](t, respAttr, containsAttr(spans.Snapshots()[0].Attributes()),
+					must.Sprintf("expected element %v=%v, all elements: %s", respAttr.Key, respAttr.Value.AsString(),
+						allKVs(spans.Snapshots()[0].Attributes())),
+				)
 			}
 
 			closer()
 			l.Close()
 		})
 	}
+}
+
+type ContainsFunc[T any] func(val T) bool
+
+func (c ContainsFunc[T]) Contains(val T) bool {
+	return c(val)
+}
+
+func containsAttr(vals []attribute.KeyValue) ContainsFunc[*attribute.KeyValue] {
+	return func(val *attribute.KeyValue) bool {
+		for _, v := range vals {
+			if v.Key == val.Key && v.Value == val.Value {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func allKVs(kvs []attribute.KeyValue) string {
+	sb := strings.Builder{}
+	for _, kv := range kvs {
+		sb.WriteString(fmt.Sprintf("%s=%v\n", kv.Key, kv.Value.AsString()))
+	}
+	return sb.String()
 }
 
 func tracer() (func(), *tracetest.InMemoryExporter, error) {
