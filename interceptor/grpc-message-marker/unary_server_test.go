@@ -27,7 +27,7 @@ func Test_UnaryInterceptor(t *testing.T) {
 		withoutRequest  bool
 		withoutResponse bool
 		withoutReqName  bool
-		name            string
+		reqName         string
 	}{
 		"Normal": {},
 		"WithoutRequest": {
@@ -35,6 +35,9 @@ func Test_UnaryInterceptor(t *testing.T) {
 		},
 		"WithoutResponse": {
 			withoutResponse: true,
+		},
+		"WithRequestName": {
+			reqName: "reqmsg",
 		},
 	}
 
@@ -59,6 +62,11 @@ func Test_UnaryInterceptor(t *testing.T) {
 			if tc.withoutResponse {
 				opts = append(opts, WithoutResponse())
 			}
+			reqName := "req"
+			if tc.reqName != "" {
+				reqName = tc.reqName
+				opts = append(opts, WithRequestName(tc.reqName))
+			}
 
 			s := grpc.NewServer(
 				grpc.ChainUnaryInterceptor(
@@ -82,11 +90,11 @@ func Test_UnaryInterceptor(t *testing.T) {
 			spans := exporter.GetSpans()
 			must.Eq(t, 1, len(spans.Snapshots()))
 			reqAttr := &attribute.KeyValue{
-				Key:   "req.pingrequest.name",
+				Key:   attribute.Key(reqName + ".pingrequest.name"),
 				Value: attribute.StringValue("me"),
 			}
 			respAttr := &attribute.KeyValue{
-				Key:   "pingresponse.response",
+				Key:   "resp.pingresponse.response",
 				Value: attribute.StringValue("me"),
 			}
 			if tc.withoutRequest {

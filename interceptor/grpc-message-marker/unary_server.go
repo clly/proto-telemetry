@@ -37,6 +37,12 @@ func WithoutResponse() InterceptorOpt {
 	}
 }
 
+func WithRequestName(name string) InterceptorOpt {
+	return func(opt *interceptorOpt) {
+		opt.requestOpts.name = name
+	}
+}
+
 type attributer interface {
 	TraceAttributes(ctx context.Context)
 }
@@ -91,7 +97,15 @@ func traceResp(ctx context.Context, iopts *interceptorOpt, resp interface{}) {
 	if iopts.withoutResponseAttributes {
 		return
 	}
-	if attributer, ok := resp.(attributer); ok {
-		attributer.TraceAttributes(ctx)
+
+	if iopts.responseOpts.withoutName {
+		if attributer, ok := resp.(attributer); ok {
+			attributer.TraceAttributes(ctx)
+		}
+		return
+	}
+
+	if namedAttributer, ok := resp.(namedAttributer); ok {
+		namedAttributer.TraceNamedAttributes(ctx, iopts.responseOpts.name)
 	}
 }
