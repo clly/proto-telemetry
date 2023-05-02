@@ -89,6 +89,8 @@ func generateFile(gen *protogen.Plugin, f *protogen.File, cfg config) {
 		}
 		if msg.Desc.IsMapEntry() {
 			debugLog("Skipping map entry", msg.GoIdent.GoName)
+			// we use fmt to format the map keys so if we have a map import it
+			_ = g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
 			continue
 		}
 		debugLog("generating fields for messages", msg.GoIdent.GoName)

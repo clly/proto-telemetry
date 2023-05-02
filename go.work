@@ -1,0 +1,7 @@
+go 1.19
+
+use (
+	.
+	./examples/ping
+	./interceptor/grpc-message-marker
+)
