@@ -1,4 +1,4 @@
-package grpc_message_marker
+package messagemarker
 
 import (
 	"context"
@@ -71,7 +71,7 @@ func Test_UnaryInterceptor(t *testing.T) {
 			s := grpc.NewServer(
 				grpc.ChainUnaryInterceptor(
 					otelgrpc.UnaryServerInterceptor(),
-					UnaryInterceptor(opts...),
+					UnaryServerInterceptor(opts...),
 				),
 			)
 			pingsvr := &ping.PingServer{}

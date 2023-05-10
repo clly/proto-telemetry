@@ -1,4 +1,4 @@
-package grpc_message_marker
+package messagemarker
 
 import (
 	"context"
@@ -51,10 +51,7 @@ type namedAttributer interface {
 	TraceNamedAttributes(ctx context.Context, pfx string)
 }
 
-type UnaryServerInterceptor func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler) (resp interface{}, err error)
-
-func UnaryInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor {
 	iOpts := &interceptorOpt{
 		requestOpts:  requestOpts{name: "req"},
 		responseOpts: responseOpts{name: "resp"},

@@ -1,4 +1,4 @@
-module github.com/clly/proto-telemetry/interceptor/grpc-message-marker
+module github.com/clly/proto-telemetry/interceptor/grpc/messagemarker
 
 go 1.19
 
