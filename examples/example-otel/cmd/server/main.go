@@ -7,9 +7,12 @@ import (
 	"net"
 	"time"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/grpc"
+
+	messagemarker "github.com/clly/proto-telemetry/interceptor/grpc/messagemarker"
 
 	"github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
 	"github.com/clly/proto-telemetry/examples/example-otel/tracing"
@@ -34,7 +37,12 @@ func run() error {
 	}
 	defer shutdown()
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			otelgrpc.UnaryServerInterceptor(),
+			messagemarker.UnaryServerInterceptor(),
+		),
+	)
 	otechov1.RegisterEchoServiceServer(server, &svr{})
 	log.Println("listening on", listener.Addr())
 	if err := server.Serve(listener); err != nil {

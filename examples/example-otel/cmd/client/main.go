@@ -10,6 +10,7 @@ import (
 
 	"github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
 	"github.com/clly/proto-telemetry/examples/example-otel/tracing"
+	messagemarker "github.com/clly/proto-telemetry/interceptor/grpc/messagemarker"
 )
 
 func main() {
@@ -20,7 +21,8 @@ func main() {
 
 func run() error {
 	connectTo := "127.0.0.1:8080"
-	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure())
+	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure(),
+		grpc.ChainUnaryInterceptor(messagemarker.UnaryServerInterceptor()))
 	if err != nil {
 		return fmt.Errorf("failed to connect to ocecho service at %s: %w", connectTo, err)
 	}
