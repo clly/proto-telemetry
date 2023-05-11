@@ -4,7 +4,8 @@ Proto-telemetry is protobuf code generator to create OpenTelemetry or
 OpenCensus helper functions to add protobuf fields to span's as attributes. 
 You can more easily add observability to your existing protobuf messages and 
 APIs and understand what's happening in our application without needing to 
-manually trace the request and response messages.
+manually trace the request and response messages. It also includes a grpc 
+interceptor to automatically trace grpc requests and responses.
 
 ## Installation
 
