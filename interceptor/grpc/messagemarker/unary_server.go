@@ -73,6 +73,28 @@ func UnaryServerInterceptor(opts ...InterceptorOpt) grpc.UnaryServerInterceptor 
 	}
 }
 
+func UnaryClientInterceptor(opts ...InterceptorOpt) grpc.UnaryClientInterceptor {
+	iOpts := &interceptorOpt{
+		requestOpts:  requestOpts{name: "req"},
+		responseOpts: responseOpts{name: "resp"},
+	}
+
+	for _, opt := range opts {
+		opt(iOpts)
+	}
+
+	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		traceReq(ctx, iOpts, req)
+		if err := invoker(ctx, method, req, reply, cc, opts...); err != nil {
+			return err
+		}
+
+		traceResp(ctx, iOpts, reply)
+
+		return nil
+	}
+
+}
 func traceReq(ctx context.Context, iopts *interceptorOpt, req interface{}) {
 	if iopts.withoutRequestAttributes {
 		return
