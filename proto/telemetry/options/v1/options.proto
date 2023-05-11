@@ -6,24 +6,24 @@ import "google/protobuf/descriptor.proto";
 
 option go_package = "github.com/clly/proto-telemetry/proto/telemetry/options/v1;v1";
 
-// global number: 1179
+// global number: 1181
 
 extend google.protobuf.FileOptions {
   // exclude_file is used to exclude an entire file generation
-  bool exclude_file = 11790;
+  bool exclude_file = 11810;
 }
 
 extend google.protobuf.FieldOptions {
   // exclude will exclude the field from the generated code
-  bool exclude = 11791;
+  bool exclude = 11811;
   // field_name will override the name used in the span attribute
-  string field_name = 11792;
+  string field_name = 11812;
 }
 
 extend google.protobuf.MessageOptions {
   // exclude_message will generate a function but not any span annotations. This is useful for assuming functions
   // implement an interface but not generating the span annotations for the message itself.
-  bool exclude_message = 11793;
+  bool exclude_message = 11813;
   // message_name will override the message prefix for fields used in the span attribute
-  string message_name = 11794;
+  string message_name = 11814;
 }
