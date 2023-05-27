@@ -68,9 +68,9 @@ registry at `buf.build/clly/proto-telemetry`.
 
 ```protobuf
  // exclude will exclude the field from the generated code
-  bool exclude = 11811;
+  bool exclude = 11821;
   // field_name will override the name used in the span attribute
-  string field_name = 11812;
+  string field_name = 11822;
 ```
 
 #### Message Options
@@ -78,16 +78,16 @@ registry at `buf.build/clly/proto-telemetry`.
 ```protobuf
   // exclude_message will generate a function but not any span annotations. This is useful for assuming functions
 // implement an interface but not generating the span annotations for the message itself.
-    bool exclude_message = 11813;
+    bool exclude_message = 11823;
 // message_name will override the message prefix for fields used in the span attribute
-    string message_name = 11814;
+    string message_name = 11824;
 ```
 
 #### File Options
 
 ```protobuf
   // exclude_file will exclude the file from the generated code
-  bool exclude_file = 11810;
+  bool exclude_file = 11820;
 ```
 
 ## Usage
