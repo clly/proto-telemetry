@@ -7,10 +7,12 @@ APIs and understand what's happening in our application without needing to
 manually trace the request and response messages. It also includes a grpc 
 interceptor to automatically trace grpc requests and responses.
 
+The proto generator behavior can be modified using extensions living in `buf.build/clly/proto-telemetry`
+
 ## Installation
 
 ```shell
-go install github.com/clly/proto-telemetry@latest
+go install github.com/clly/proto-telemetry/cmd/protoc-gen-go-telemetry@latest
 ```
 
 ## Example
@@ -66,9 +68,9 @@ registry at `buf.build/clly/proto-telemetry`.
 
 ```protobuf
  // exclude will exclude the field from the generated code
-  bool exclude = 11791;
+  bool exclude = 11821;
   // field_name will override the name used in the span attribute
-  string field_name = 11792;
+  string field_name = 11822;
 ```
 
 #### Message Options
@@ -76,16 +78,16 @@ registry at `buf.build/clly/proto-telemetry`.
 ```protobuf
   // exclude_message will generate a function but not any span annotations. This is useful for assuming functions
 // implement an interface but not generating the span annotations for the message itself.
-    bool exclude_message = 11793;
+    bool exclude_message = 11823;
 // message_name will override the message prefix for fields used in the span attribute
-    string message_name = 11794;
+    string message_name = 11824;
 ```
 
 #### File Options
 
 ```protobuf
   // exclude_file will exclude the file from the generated code
-  bool exclude_file = 11790;
+  bool exclude_file = 11820;
 ```
 
 ## Usage
