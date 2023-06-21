@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/shoenig/test/must"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -43,7 +44,7 @@ func Test_Message(t *testing.T) {
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
 			// can I use math to figure out how many messages I get out of this?
-			testMessages := testMessageGenerator(tc.numMsg, tc.children)
+			testMessages := testMessageGenerator(t, tc.numMsg, tc.children)
 
 			msgs := []Message{}
 			for _, testMsg := range testMessages {
@@ -61,13 +62,13 @@ func Test_Message(t *testing.T) {
 	}
 }
 
-func testMessageGenerator(numMsg int, children int) []*protogen.Message {
+func testMessageGenerator(t *testing.T, numMsg int, children int) []*protogen.Message {
 	msgs := make([]*protogen.Message, 0, numMsg*children)
 	fmt.Println(children)
 	for i := 0; i < numMsg; i++ {
-		msg := genMsg()
+		msg := genMsg(t)
 		if children > 0 {
-			children := testMessageGenerator(2, children-1)
+			children := testMessageGenerator(t, 2, children-1)
 			msg.Messages = children
 		}
 		msgs = append(msgs, msg)
@@ -75,8 +76,12 @@ func testMessageGenerator(numMsg int, children int) []*protogen.Message {
 	return msgs
 }
 
-func genMsg() *protogen.Message {
-	name := rando()
+func genMsg(t *testing.T) *protogen.Message {
+	b := make([]byte, 128)
+	_, err := rand.Read(b)
+	must.NoError(t, err)
+	name := hex.EncodeToString(b)
+
 	return &protogen.Message{
 		GoIdent: protogen.GoIdent{
 			GoName:       name,
@@ -97,10 +102,4 @@ func genMsg() *protogen.Message {
 			Trailing:        "",
 		},
 	}
-}
-
-func rando() string {
-	b := make([]byte, 128)
-	rand.Read(b)
-	return hex.EncodeToString(b)
 }
