@@ -7,12 +7,12 @@ import (
 	"net"
 	"time"
 
-	"go.opentelemetry.io/otel"
+	ocechov1 "github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/ocecho/v1"
+	"github.com/clly/proto-telemetry/examples/example-oc/tracing"
+
+	"go.opencensus.io/trace"
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/grpc"
-
-	"github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/ocecho/v1"
-	"github.com/clly/proto-telemetry/examples/example-oc/tracing"
 )
 
 func main() {
@@ -45,7 +45,7 @@ type svr struct {
 }
 
 func (s *svr) Echo(ctx context.Context, req *ocechov1.EchoRequest) (*ocechov1.EchoResponse, error) {
-	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, "Echo")
+	ctx, span := trace.StartSpan(ctx, "Echo")
 	defer span.End()
 	req.TraceAttributes(ctx)
 	return &ocechov1.EchoResponse{
