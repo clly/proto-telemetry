@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/golang/protobuf v1.5.3
-	github.com/hashicorp/go-uuid v1.0.3
 	github.com/stretchr/testify v1.8.3
 	google.golang.org/protobuf v1.30.0
 )

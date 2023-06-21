@@ -42,7 +42,7 @@ go/lint:
 go/tidy/mod: TARGET=go/tidy
 go/tidy/mod: $(GO_MODULE_DIRS)
 go/tidy:
-	@go mod tidy
+	go mod tidy
 
 
 .PHONY: bench
