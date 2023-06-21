@@ -3,6 +3,7 @@ go 1.19
 use (
 	.
 	./examples/example-oc
+	./examples/example-otel
 	./examples/ping
 	./interceptor/grpc/messagemarker
 )
