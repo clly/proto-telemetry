@@ -6,4 +6,5 @@ use (
 	./examples/example-otel
 	./examples/ping
 	./interceptor/grpc/messagemarker
+	./test
 )
