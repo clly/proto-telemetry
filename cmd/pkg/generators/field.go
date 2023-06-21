@@ -12,14 +12,13 @@ import (
 )
 
 type FieldAttribute struct {
-	field              *protogen.Field
-	goName             string
-	attrName           string
-	attrKind           string
-	castCall           string
-	isTrailer          bool
-	g                  generator
-	telemetryGenerator TelemetryBackend
+	field     *protogen.Field
+	goName    string
+	attrName  string
+	attrKind  string
+	castCall  string
+	isTrailer bool
+	g         generator
 }
 
 func NewFieldGenerator(f *protogen.Field, t TelemetryBackend) FieldAttribute {

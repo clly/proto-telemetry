@@ -12,10 +12,6 @@ type generator interface {
 	Generate(f *FileGenerator, named bool)
 }
 
-type Generator[T generator] struct {
-	typeGen T
-}
-
 type MapGenerator struct {
 	m *protogen.Field
 }

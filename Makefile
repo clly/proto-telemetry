@@ -39,7 +39,7 @@ go/test:
 	@go test -timeout $(TIMEOUT) ./...
 
 .PHONY: go/lint/mod go/lint
-go/lint/mod: TARGET=go/lint
+go/lint/mod: TARGET=go/lint fmt
 go/lint/mod: $(GO_MODULE_DIRS)
 go/lint:
 	@golangci-lint run --config $(GOLANGCI_CONFIG_DIR)/.golangci.yml
