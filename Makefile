@@ -5,6 +5,7 @@ BENCHFLAGS = -gcflags '-l' -benchmem -bench=. -benchtime 5s
 GO_MODULE_DIRS ?= $(shell go list -m -f "{{ .Dir }}" | grep -v mod-vendor)
 GOLANGCI_CONFIG_DIR ?= $(CURDIR)
 TIMEOUT ?= 10s
+GOFILES = $(shell find -type f -name '*.go' ! -name '*.pb.go')
 
 
 .PHONY: dev
@@ -20,6 +21,11 @@ lint: go/lint/mod
 
 .PHONY: tidy
 tidy: go/tidy/mod
+
+.PHONY: fmt
+fmt: $(GOFILES)
+	@echo "Running goimports -w"
+	@goimports -w $^
 
 .PHONY: $(GO_MODULE_DIRS)
 $(GO_MODULE_DIRS):
