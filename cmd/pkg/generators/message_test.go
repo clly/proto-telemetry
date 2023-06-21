@@ -1,10 +1,11 @@
 package generators
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -75,7 +76,7 @@ func testMessageGenerator(numMsg int, children int) []*protogen.Message {
 }
 
 func genMsg() *protogen.Message {
-	name, _ := uuid.GenerateUUID()
+	name := rando()
 	return &protogen.Message{
 		GoIdent: protogen.GoIdent{
 			GoName:       name,
@@ -96,4 +97,10 @@ func genMsg() *protogen.Message {
 			Trailing:        "",
 		},
 	}
+}
+
+func rando() string {
+	b := make([]byte, 128)
+	rand.Read(b)
+	return hex.EncodeToString(b)
 }

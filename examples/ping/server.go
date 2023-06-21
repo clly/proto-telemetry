@@ -1,7 +1,10 @@
 package ping
 
-import "context"
-import pingv1pb "github.com/clly/proto-telemetry/examples/ping/proto/gen/ping/v1"
+import (
+	"context"
+
+	pingv1pb "github.com/clly/proto-telemetry/examples/ping/proto/gen/ping/v1"
+)
 
 // PingServer implements the PingServerService grpc server.
 type PingServer struct{}
