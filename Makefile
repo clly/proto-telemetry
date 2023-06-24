@@ -12,6 +12,9 @@ GOFILES = $(shell find -type f -name '*.go' ! -name '*.pb.go')
 dev:
 	./run-dev.sh
 
+build:
+	go build ./cmd/protoc-gen-go-telemetry
+
 .PHONY: test
 test:
 	go test ./...
