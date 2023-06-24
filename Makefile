@@ -12,8 +12,8 @@ GOFILES = $(shell find -type f -name '*.go' ! -name '*.pb.go')
 dev:
 	./run-dev.sh
 
-.PHONY: tests
-tests:
+.PHONY: test
+test:
 	go test ./...
 
 .PHONY: lint
