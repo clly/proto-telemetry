@@ -1,10 +1,10 @@
 name: "Go Checks"
 on:
-    pull_request:
-    push:
-        branches:
-            # It's important that the action also runs on merge to main
-            - main
+  pull_request:
+  push:
+    branches:
+      # It's important that the action also runs on merge to main
+      - main
 
 jobs:
   test:
