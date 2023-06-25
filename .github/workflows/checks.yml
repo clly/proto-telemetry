@@ -7,6 +7,17 @@ on:
       - main
 
 jobs:
+  mods:
+    runs-on: ubuntu-latest
+    outputs:
+      go-mods: ${{ steps.get-go-mods.outputs.go-mods }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: get-go-mods
+        run: |
+          f=$(./.github/mods.sh | ./.github/in-to-json.py)
+          echo "go-mods=${f}" >> $GITHUB_OUTPUT
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -18,6 +29,10 @@ jobs:
         make test
   lint:
     runs-on: ubuntu-latest
+    needs: [mods]
+    strategy:
+      matrix:
+        mod: ${{ fromJson(needs.mods.outputs.go-mods)}}
     steps:
     - uses: actions/checkout@v3
     - name: Setup Go environment
@@ -30,6 +45,7 @@ jobs:
           # When `install-mode` is `goinstall` the value can be v1.2.3, `latest`, or the hash of a commit.
           version: v1.53
           skip-pkg-cache: true
+          working-directory: ${{ matrix.mod }}
   build:
     runs-on: ubuntu-latest
     steps:
