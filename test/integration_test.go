@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.opencensus.io/trace"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"google.golang.org/genproto/googleapis/type/datetime"
 	"google.golang.org/protobuf/proto"
@@ -37,10 +36,6 @@ type IntegrationSuite struct {
 
 	ocexporter         *octracing.InMemoryExporter
 	ocexporterShutdown func()
-}
-
-type attributer interface {
-	Attributes() []attribute.KeyValue
 }
 
 func (s *IntegrationSuite) SetupSuite() {
@@ -77,12 +72,12 @@ func otTrace(t *testing.T, ta TraceAttributer) {
 	span.End()
 }
 
-func otNamedTrace(t *testing.T, na TraceNamedAttributer, pfx string) {
-	ctx := context.Background()
-	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, t.Name())
-	na.TraceNamedAttributes(ctx, pfx)
-	span.End()
-}
+// func otNamedTrace(t *testing.T, na TraceNamedAttributer, pfx string) {
+// 	ctx := context.Background()
+// 	ctx, span := otel.Tracer("protoc-gen-go-telemetry/example/server").Start(ctx, t.Name())
+// 	na.TraceNamedAttributes(ctx, pfx)
+// 	span.End()
+// }
 
 func ocTrace(t *testing.T, ta TraceAttributer) {
 	ctx := context.Background()
@@ -111,7 +106,7 @@ func (s *IntegrationSuite) SetupTest() {
 
 func (s *IntegrationSuite) AfterTest() {
 	s.ocexporterShutdown()
-	s.openTelemetryExporter.Shutdown(context.Background())
+	s.NoError(s.openTelemetryExporter.Shutdown(context.Background()))
 }
 
 func (s *IntegrationSuite) AfterSuite() {
@@ -236,12 +231,11 @@ func (s *IntegrationSuite) Test_OpenTelemetry() {
 
 func verify(t *testing.T, msg TestTraceAttributer, attributes map[string]any) {
 	type value struct {
-		excluded  bool
-		fieldName string
-		value     interface{}
-		typ       protoreflect.Kind
-		isMap     bool
-		realMap   any
+		excluded bool
+		value    interface{}
+		typ      protoreflect.Kind
+		isMap    bool
+		realMap  any
 	}
 
 	fields := make(map[string]value)

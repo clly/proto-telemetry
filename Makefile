@@ -34,7 +34,7 @@ fmt: $(GOFILES)
 .PHONY: $(GO_MODULE_DIRS)
 $(GO_MODULE_DIRS):
 	@echo -e "Running $(TARGET) for $(@)\n"
-	make -f $(CURDIR)/Makefile -C $@ $(TARGET)
+	make -k -f $(CURDIR)/Makefile -C $@ $(TARGET)
 
 .PHONY: go/test/mod go/test
 go/test/mod: TARGET=go/test

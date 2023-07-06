@@ -44,8 +44,7 @@ linters:
     # - tenv
     # - thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers
     # - unconvert # removes unnecessary type conversions
-    # - unparam # reports unused function parameters
-    # - unused
+    - unused
     # - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     # - wastedassign # finds wasted assignment statements
     # - whitespace # detects leading and trailing whitespace

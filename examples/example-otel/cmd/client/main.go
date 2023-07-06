@@ -8,6 +8,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	otechov1 "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
 	"github.com/clly/proto-telemetry/examples/example-otel/tracing"
@@ -22,7 +23,7 @@ func main() {
 
 func run() error {
 	connectTo := "127.0.0.1:8080"
-	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure(),
+	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(otelgrpc.UnaryClientInterceptor(), messagemarker.UnaryClientInterceptor()))
 	if err != nil {
 		return fmt.Errorf("failed to connect to ocecho service at %s: %w", connectTo, err)
