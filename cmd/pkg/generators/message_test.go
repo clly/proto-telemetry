@@ -3,10 +3,8 @@ package generators
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"testing"
 
-	"github.com/shoenig/test/must"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -64,7 +62,6 @@ func Test_Message(t *testing.T) {
 
 func testMessageGenerator(t *testing.T, numMsg int, children int) []*protogen.Message {
 	msgs := make([]*protogen.Message, 0, numMsg*children)
-	fmt.Println(children)
 	for i := 0; i < numMsg; i++ {
 		msg := genMsg(t)
 		if children > 0 {
@@ -79,7 +76,7 @@ func testMessageGenerator(t *testing.T, numMsg int, children int) []*protogen.Me
 func genMsg(t *testing.T) *protogen.Message {
 	b := make([]byte, 128)
 	_, err := rand.Read(b)
-	must.NoError(t, err)
+	require.NoError(t, err)
 	name := hex.EncodeToString(b)
 
 	return &protogen.Message{

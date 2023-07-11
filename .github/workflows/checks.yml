@@ -1,0 +1,89 @@
+name: "Go Checks"
+on:
+  pull_request:
+  push:
+    branches:
+      # It's important that the action also runs on merge to main
+      - main
+
+jobs:
+  mods:
+    runs-on: ubuntu-latest
+    outputs:
+      go-mods: ${{ steps.get-go-mods.outputs.go-mods }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: get-go-mods
+        run: |
+          f=$(./.github/mods.sh | ./.github/in-to-json.py)
+          echo "go-mods=${f}" >> $GITHUB_OUTPUT
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Go environment
+      uses: actions/setup-go@v4.0.1
+    - name: test
+      run: |
+        make test
+  lint:
+    runs-on: ubuntu-latest
+    needs: [mods]
+    strategy:
+      matrix:
+        mod: ${{ fromJson(needs.mods.outputs.go-mods)}}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Go environment
+      uses: actions/setup-go@v4.0.1
+    - name: lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+          # Require: The version of golangci-lint to use.
+          # When `install-mode` is `binary` (default) the value can be v1.2 or v1.2.3 or `latest` to use the latest version.
+          # When `install-mode` is `goinstall` the value can be v1.2.3, `latest`, or the hash of a commit.
+          version: v1.53
+          skip-pkg-cache: true
+          working-directory: ${{ matrix.mod }}
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Go environment
+      uses: actions/setup-go@v4.0.1
+    - name: build
+      run: |
+        make build
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        # default fetch-depth is insufficent to find previous coverage notes
+        fetch-depth: 10
+
+    - uses: gwatts/go-coverage-action@v1
+      id: coverage
+      with:
+        # Optional coverage threshold
+        # use fail-coverage to determine what should happen below this threshold
+        coverage-threshold: 20
+
+        # collect coverage for all packages beyond the one under test
+        cover-pkg: ./...
+
+        # Ignore code-generated files when calculating coverage totals
+        ignore-pattern: |
+          \.pb\.go$
+          \_string\.go$
+
+        # A url that the html report will be accessible at, once your
+        # workflow uploads it.  Used in the pull request comment.
+        #report-url: https://artifacts.example.com/go-coverage/${{ github.ref_name}}.html
+
+          #- name: Upload coverage to s3
+      # ensure this runs regardless of whether the threshold is met using always()
+      #if: always() && steps.coverage.outputs.report-pathname != ''
+        #run: |
+        #       aws s3 cp ${{ steps.coverage.outputs.report-pathname }} s3://artifacts.example.com-bucket/go-coverage/${{ github.ref_name}}.html

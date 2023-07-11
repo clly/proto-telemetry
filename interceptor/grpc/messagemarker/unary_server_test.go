@@ -78,7 +78,7 @@ func Test_UnaryServerInterceptor(t *testing.T) {
 			pingsvr := &ping.PingServer{}
 			pingv1.RegisterPingServiceServer(s, pingsvr)
 			go func() {
-				s.Serve(l)
+				must.NoError(t, s.Serve(l))
 			}()
 
 			conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -177,7 +177,7 @@ func TestUnaryClientInterceptor(t *testing.T) {
 			pingsvr := &ping.PingServer{}
 			pingv1.RegisterPingServiceServer(s, pingsvr)
 			go func() {
-				s.Serve(l)
+				must.NoError(t, s.Serve(l))
 			}()
 
 			conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port),
@@ -227,7 +227,7 @@ func TestUnaryClientInterceptor(t *testing.T) {
 			}
 
 			closer()
-			l.Close()
+			must.NoError(t, l.Close())
 		})
 	}
 }

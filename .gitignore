@@ -3,3 +3,6 @@ examples/example-otel/server
 
 examples/example-oc/client
 examples/example-oc/server
+protoc-gen-go-telemetry
+
+dist/
