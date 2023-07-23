@@ -2,6 +2,8 @@ go 1.19
 
 use (
 	.
+	./examples
 	./examples/ping
 	./interceptor/grpc/messagemarker
+	./test
 )
