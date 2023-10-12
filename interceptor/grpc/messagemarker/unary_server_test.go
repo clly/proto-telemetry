@@ -9,7 +9,6 @@ import (
 
 	"github.com/shoenig/test/must"
 	"github.com/shoenig/test/portal"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -56,6 +55,9 @@ func Test_UnaryServerInterceptor(t *testing.T) {
 			closer, exporter, tp, err := tracer()
 			must.NoError(t, err)
 
+			t.Cleanup(func() {
+				closer()
+			})
 			opts := []InterceptorOpt{}
 			if tc.withoutRequest {
 				opts = append(opts, WithoutRequest())
@@ -80,6 +82,10 @@ func Test_UnaryServerInterceptor(t *testing.T) {
 			go func() {
 				must.NoError(t, s.Serve(l))
 			}()
+
+			t.Cleanup(func() {
+				s.GracefulStop()
+			})
 
 			conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 			must.NoError(t, err)
@@ -120,9 +126,6 @@ func Test_UnaryServerInterceptor(t *testing.T) {
 						allKVs(spans.Snapshots()[0].Attributes())),
 				)
 			}
-
-			closer()
-			require.NoError(t, l.Close())
 		})
 	}
 }
@@ -180,6 +183,10 @@ func TestUnaryClientInterceptor(t *testing.T) {
 				must.NoError(t, s.Serve(l))
 			}()
 
+			t.Cleanup(func() {
+				s.GracefulStop()
+				closer()
+			})
 			conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port),
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
 				grpc.WithChainUnaryInterceptor(
@@ -225,9 +232,6 @@ func TestUnaryClientInterceptor(t *testing.T) {
 						allKVs(spans.Snapshots()[0].Attributes())),
 				)
 			}
-
-			closer()
-			must.NoError(t, l.Close())
 		})
 	}
 }
