@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	ocechov1 "github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/echo/v1"
+	ocechov1 "github.com/clly/proto-telemetry/examples/example-oc/gen/proto/go/ocecho/v1"
 	"github.com/clly/proto-telemetry/examples/example-oc/tracing"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"

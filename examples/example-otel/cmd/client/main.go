@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	otechov1 "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
+	otechov1 "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/echo/v1"
 	"github.com/clly/proto-telemetry/examples/example-otel/tracing"
 	messagemarker "github.com/clly/proto-telemetry/interceptor/grpc/messagemarker"
 )
