@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	examplepb "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/otecho/v1"
+	examplepb "github.com/clly/proto-telemetry/examples/example-otel/gen/proto/go/echo/v1"
 )
 
 func BenchmarkTraceAttributes(b *testing.B) {
