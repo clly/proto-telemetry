@@ -18,15 +18,6 @@ jobs:
           f=$(./.github/mods.sh | ./.github/in-to-json.py)
           echo "go-mods=${f}" >> $GITHUB_OUTPUT
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup Go environment
-      uses: actions/setup-go@v4.0.1
-    - name: test
-      run: |
-        make test
   lint:
     runs-on: ubuntu-latest
     needs: [mods]
@@ -55,6 +46,23 @@ jobs:
     - name: build
       run: |
         make build
+  generate-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go environment
+        uses: actions/setup-go@v4.0.1
+      - uses: bufbuild/buf-setup-action@v1
+      - name: Install proto generators
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+      - name: generate
+        run: |
+          cd test && ./generate.bash
+      - name: test
+        run: |
+          make test
   coverage:
     runs-on: ubuntu-latest
     steps:
