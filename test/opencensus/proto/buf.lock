@@ -4,8 +4,8 @@ deps:
   - remote: buf.build
     owner: clly
     repository: telemetry
-    commit: 73cac89c23b4441fad1731dd9227a7f9
+    commit: e8a81c186fdb4ee9aef1a867e112ae0d
   - remote: buf.build
     owner: googleapis
     repository: googleapis
-    commit: 5ae7f88519b04fe1965da0f8a375a088
+    commit: 28151c0d0a1641bf938a7672c500e01d

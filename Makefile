@@ -17,8 +17,7 @@ build:
 	go build ./cmd/protoc-gen-go-telemetry
 
 .PHONY: test
-test:
-	go test ./...
+test: go/test/mod
 
 .PHONY: lint
 lint: go/lint/mod
@@ -46,7 +45,7 @@ go/test:
 go/lint/mod: TARGET=go/lint fmt
 go/lint/mod: $(GO_MODULE_DIRS)
 go/lint:
-	@golangci-lint run --config $(GOLANGCI_CONFIG_DIR)/.golangci.yml
+	@golangci-lint run --fix --config $(GOLANGCI_CONFIG_DIR)/.golangci.yml
 
 .PHONY: go/tidy/mod go/tidy
 go/tidy/mod: TARGET=go/tidy
