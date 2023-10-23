@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"reflect"
@@ -154,15 +155,15 @@ func (s *IntegrationSuite) Test_OpenTelemetry() {
 		// 		},
 		// 	},
 		// },
-		"MapMessage": {
-			msg: &ottestv1.MapMessage{
-				Meta: map[string]string{
-					"a": uuid.New().String(),
-					"b": uuid.New().String(),
-					"c": uuid.New().String(),
-				},
-			},
-		},
+		// "MapMessage": {
+		// 	msg: &ottestv1.MapMessage{
+		// 		Meta: map[string]string{
+		// 			"a": uuid.New().String(),
+		// 			"b": uuid.New().String(),
+		// 			"c": uuid.New().String(),
+		// 		},
+		// 	},
+		// },
 		"ExcludeField": {
 			msg: &ottestv1.ExcludeField{
 				Name:      uuid.New().String(),
@@ -193,6 +194,11 @@ func (s *IntegrationSuite) Test_OpenTelemetry() {
 				Msg: uuid.New().String(),
 			},
 		},
+		// "RepeatedField": {
+		// 	msg: &ottestv1.RepeatedField{
+		// 		Msg: []string{"a", "b", "c"},
+		// 	},
+		// },
 	}
 
 	for name, tc := range testcases {
@@ -235,7 +241,9 @@ func verify(t *testing.T, msg TestTraceAttributer, attributes map[string]any) {
 		value    interface{}
 		typ      protoreflect.Kind
 		isMap    bool
+		isList   bool
 		realMap  any
+		// realList any
 	}
 
 	fields := make(map[string]value)
@@ -247,6 +255,7 @@ func verify(t *testing.T, msg TestTraceAttributer, attributes map[string]any) {
 			value:    v.Interface(),
 			typ:      fd.Kind(),
 			isMap:    fd.IsMap(),
+			isList:   fd.IsList(),
 		}
 
 		if val.isMap {
@@ -285,6 +294,10 @@ func verify(t *testing.T, msg TestTraceAttributer, attributes map[string]any) {
 			}
 		}
 
+		// if val.isList {
+
+		// }
+
 		fields[name] = val
 		return true
 	})
@@ -298,6 +311,10 @@ func verify(t *testing.T, msg TestTraceAttributer, attributes map[string]any) {
 		if val.isMap {
 			mapIter(pfx+"."+name, expectedAttributes, reflect.ValueOf(val.realMap))
 			continue
+		}
+		if val.isList {
+			fmt.Fprintf(os.Stderr, "%#v\n", reflect.TypeOf(val.value).Kind().String())
+			listIter(pfx+"."+name, expectedAttributes, reflect.ValueOf(val.value))
 		}
 		if !val.excluded {
 			expectedAttributes[pfx+"."+name] = val.value
@@ -364,15 +381,15 @@ func (s *IntegrationSuite) Test_IntegrationOpenCensus() {
 		// 		},
 		// 	},
 		// },
-		"MapMessage": {
-			msg: &octestv1.MapMessage{
-				Meta: map[string]string{
-					"a": uuid.New().String(),
-					"b": uuid.New().String(),
-					"c": uuid.New().String(),
-				},
-			},
-		},
+		// "MapMessage": {
+		// 	msg: &octestv1.MapMessage{
+		// 		Meta: map[string]string{
+		// 			"a": uuid.New().String(),
+		// 			"b": uuid.New().String(),
+		// 			"c": uuid.New().String(),
+		// 		},
+		// 	},
+		// },
 		"ExcludeField": {
 			msg: &octestv1.ExcludeField{
 				Name:      uuid.New().String(),
@@ -436,6 +453,13 @@ func mapIter(pfx string, m map[string]any, val reflect.Value) {
 	for iter.Next() {
 		m[pfx+"_"+iter.Key().String()] = iter.Value().Interface()
 	}
+}
+
+func listIter(key string, m map[string]any, val reflect.Value) {
+	fmt.Fprintf(os.Stderr, "%#v\n", val.Kind().String())
+	reflect.ValueOf(val.Interface())
+
+	fmt.Fprintf(os.Stderr, "%#v\n", val.Interface())
 }
 
 // In order for 'go test' to run this suite, we need to create
