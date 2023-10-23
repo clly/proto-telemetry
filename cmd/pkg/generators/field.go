@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
+	"github.com/clly/proto-telemetry/cmd/pkg/logger"
 	"github.com/clly/proto-telemetry/cmd/pkg/options"
 )
 
@@ -84,11 +85,19 @@ func newField(field *protogen.Field, t TelemetryBackend) FieldAttribute {
 		field:    field,
 	}
 
-	if field.Desc.IsMap() {
-		fa.isTrailer = true
-		mg := NewMapGenerator(field)
-		fa.g = mg
-	}
+	// maps are currently unsupported
+	// if field.Desc.IsMap() {
+	// fa.isTrailer = true
+	// mg := NewMapGenerator(field)
+	// fa.g = mg
+	// }
+
+	// lists are currently unsupported
+	// if field.Desc.IsList() {
+	// repeatedGenerator := NewRepeatedGenerator(field)
+	// fa.g = repeatedGenerator
+	// logger.Default().Debug(name.fieldName, "Is repeated")
+	// }
 
 	return fa
 }
@@ -98,6 +107,8 @@ func (f *FieldAttribute) Generate(g *protogen.GeneratedFile, named bool) {
 		// fmt.Fprintln(os.Stderr, "Kind", f.field.Desc.Kind().GoString(), "of type", f.field.GoIdent.GoName, "in", f.field.Parent.GoIdent.GoName, "is unsupported")
 		return
 	}
+
+	logger.Default().Debug("Performing field generation for ", f.attrName)
 
 	if options.GetTelemetryFieldExclude(protodesc.ToFieldDescriptorProto(f.field.Desc), false) {
 		return

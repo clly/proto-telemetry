@@ -4,7 +4,6 @@ package testv1
 
 import (
 	context "context"
-	fmt "fmt"
 	trace "go.opencensus.io/trace"
 )
 
@@ -143,11 +142,6 @@ func (x *MapMessage) TraceAttributes(ctx context.Context) {
 	}
 
 	span.AddAttributes()
-	for m, v := range x.GetMeta() {
-		span.AddAttributes(
-			trace.StringAttribute(fmt.Sprintf("mapmessage.meta_%s", m), v),
-		)
-	}
 }
 
 func (x *MapMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
@@ -157,11 +151,6 @@ func (x *MapMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
 	}
 
 	span.AddAttributes()
-	for m, v := range x.GetMeta() {
-		span.AddAttributes(
-			trace.StringAttribute(fmt.Sprintf("pfx.mapmessage.meta_%s", m), v),
-		)
-	}
 }
 
 func (x *MessageDetails) TraceAttributes(ctx context.Context) {

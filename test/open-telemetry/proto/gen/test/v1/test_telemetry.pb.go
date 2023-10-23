@@ -4,7 +4,6 @@ package testv1
 
 import (
 	context "context"
-	fmt "fmt"
 	attribute "go.opentelemetry.io/otel/attribute"
 	trace "go.opentelemetry.io/otel/trace"
 )
@@ -144,11 +143,6 @@ func (x *MapMessage) TraceAttributes(ctx context.Context) {
 	}
 
 	span.SetAttributes()
-	for m, v := range x.GetMeta() {
-		span.SetAttributes(
-			attribute.String(fmt.Sprintf("mapmessage.meta_%s", m), v),
-		)
-	}
 }
 
 func (x *MapMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
@@ -158,11 +152,6 @@ func (x *MapMessage) TraceNamedAttributes(ctx context.Context, pfx string) {
 	}
 
 	span.SetAttributes()
-	for m, v := range x.GetMeta() {
-		span.SetAttributes(
-			attribute.String(fmt.Sprintf("pfx.mapmessage.meta_%s", m), v),
-		)
-	}
 }
 
 func (x *MessageDetails) TraceAttributes(ctx context.Context) {
@@ -257,4 +246,22 @@ func (x *NameField) TraceNamedAttributes(ctx context.Context, pfx string) {
 	span.SetAttributes(
 		attribute.String(pfx+".namefield.message", x.Msg),
 	)
+}
+
+func (x *RepeatedField) TraceAttributes(ctx context.Context) {
+	span := trace.SpanFromContext(ctx)
+	if !span.IsRecording() {
+		return
+	}
+
+	span.SetAttributes()
+}
+
+func (x *RepeatedField) TraceNamedAttributes(ctx context.Context, pfx string) {
+	span := trace.SpanFromContext(ctx)
+	if !span.IsRecording() {
+		return
+	}
+
+	span.SetAttributes()
 }

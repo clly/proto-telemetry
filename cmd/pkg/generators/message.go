@@ -63,8 +63,16 @@ func (m Message) Generate(f *FileGenerator, named bool) {
 	g.P(f.Telemetry.Attribute(), "(")
 
 	for _, field := range m.m.Fields {
-		f := NewFieldGenerator(field, f.Telemetry)
-		f.Generate(g, named)
+		fieldGenerator := NewFieldGenerator(field, f.Telemetry)
+		if fieldGenerator.field.Desc.IsList() {
+			continue
+		}
+		if fieldGenerator.g != nil && !fieldGenerator.isTrailer {
+			// fieldGenerator.g.Generate(f, named)
+		} else {
+			fieldGenerator.Generate(f.g, named)
+		}
+
 	}
 	g.P(")")
 

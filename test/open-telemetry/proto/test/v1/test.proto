@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package opentelemetry.test.v1;
 
-import "telemetry/options/v1/options.proto";
 import "google/type/datetime.proto";
+import "telemetry/options/v1/options.proto";
 
 option go_package = "github.com/clly/protoc-telemetry-go/test/open-telemetry/proto/gen/test/v1;testv1";
 
@@ -60,4 +60,8 @@ message RenameMessagePrefix {
 
 message NameField {
   string msg = 1 [(telemetry.options.v1.field_name) = "message"];
+}
+
+message RepeatedField {
+  repeated string msg = 1;
 }
