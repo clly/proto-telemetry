@@ -9,7 +9,7 @@ require (
 	go.opencensus.io v0.24.0
 	go.opentelemetry.io/otel v1.16.0
 	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
-	google.golang.org/grpc v1.56.0
+	google.golang.org/grpc v1.56.3
 	google.golang.org/protobuf v1.30.0
 )
 
