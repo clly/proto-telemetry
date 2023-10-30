@@ -1,0 +1,1 @@
+{"go-coverage-action-fmt":1,"coverage_pct":21.761658031088082,"pkg_stats":{"github.com/clly/proto-telemetry/cmd/pkg/generators":[16.216216216216218],"github.com/clly/proto-telemetry/cmd/pkg/logger":[93.33333333333333],"github.com/clly/proto-telemetry/cmd/pkg/options":[13.333333333333334]},"skipped_count":4}
