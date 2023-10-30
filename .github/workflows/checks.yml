@@ -65,7 +65,7 @@ jobs:
           make test
   coverage:
     permissions:
-      contents: read
+      contents: write
       actions: write
       pull-requests: write
     runs-on: ubuntu-latest
